@@ -66,7 +66,9 @@ extern void _Error_Handler(char*, int);
 /* USER CODE END Includes */
 
 /* USER CODE BEGIN Private defines */
-
+extern DMA_HandleTypeDef hdma_dfsdm1_flt0;
+extern DMA_HandleTypeDef hdma_dfsdm1_flt1;
+extern DMA_HandleTypeDef hdma_uart4_rx;
 /* USER CODE END Private defines */
 
 void MX_DMA_Init(void);

@@ -73,6 +73,7 @@
 
 /* USER CODE BEGIN Private defines */
 
+extern void SystemInitialization(void);
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

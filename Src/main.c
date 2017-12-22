@@ -133,8 +133,8 @@ int main(void)
   MX_TIM2_Init();
 
   /* USER CODE BEGIN 2 */
-
-  HAL_TIM_PWM_Start(&htim2,TIM_CHANNEL_1);
+  //system initialization
+  SystemInitialization();
   /* USER CODE END 2 */
 
   /* Call init function for freertos objects (in freertos.c) */
