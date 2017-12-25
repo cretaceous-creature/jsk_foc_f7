@@ -19,11 +19,57 @@
 #include "task.h"
 #include "cmsis_os.h"
 
+
+#define TXHEADER 0xF8
 //uart4 DMA data buffer
-uint8_t enchall_buff[8];
-
-void UART4_DMA2_Cplt_Callback(DMA_HandleTypeDef *hdma)
+//0xf8, 1xxx|xxxx, 011x|xxxx, byte, byte
+uint8_t enchall_buff[5];
+//data type struct
+struct ENCHALLDATA
 {
+uint8_t mseq_out; //1bit
+uint8_t auxbit_in;//1bit
+uint8_t hole_in;//3bits
+uint8_t calc_tag;//2bits
+uint8_t enc_counter; //5bits
+uint8_t enc_high;//1byte
+uint8_t enc_low;//1byte
+}enchall;
 
+void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart)
+{
+	//error...
+	_Error_Handler("omg",11);
+}
 
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
+	if(huart->Instance==huart4.Instance) //not necessary to check..
+	{
+		for(int i=0; i<5; i++)
+		{
+			if(enchall_buff[i] == TXHEADER)
+			{
+				uint8_t s = i==4?0:i+1; //second byte  1xxx|xxxx
+				uint8_t t = s==4?0:s+1; //third byte   011x|xxxx
+				if(enchall_buff[s]&0x80&&enchall_buff[t]&0x60)
+				{
+					//then we can obtain the correct bytes...
+					enchall.mseq_out = enchall_buff[s]&0x01;
+					enchall.auxbit_in = enchall_buff[s]&0x02;
+					enchall.hole_in = enchall_buff[s]&0x1c; //0001|1100
+					enchall.calc_tag = enchall_buff[s]&0x60; // 0110|0000
+					//next byte
+					enchall.enc_counter = enchall_buff[t]&0x1f; // 0001|1111
+					//next two bytes
+					uint8_t b1 = t==4?0:t+1;
+					uint8_t b2 = b1==4?0:b1+1;
+					enchall.enc_high = enchall_buff[b1]&0xff;
+					enchall.enc_low = enchall_buff[b2]&0xff;
+				}
+			}
+		}
+		//continue DMA
+		HAL_UART_DMAResume(&huart4);
+	}
 }
