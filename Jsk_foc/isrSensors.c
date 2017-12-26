@@ -39,8 +39,9 @@ uint8_t enc_low;//1byte
 void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart)
 {
 	//error...
-	_Error_Handler("omg",11);
+//_Error_Handler("omg",11);
 }
+
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {

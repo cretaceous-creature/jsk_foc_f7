@@ -17,6 +17,7 @@
 #include "FreeRTOS.h"
 #include "task.h"
 #include "cmsis_os.h"
+#include "usart.h"
 
 //queue
 extern osMessageQId buzzerQueueHandle;

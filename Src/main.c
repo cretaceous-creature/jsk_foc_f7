@@ -134,12 +134,12 @@ int main(void)
 
   /* USER CODE BEGIN 2 */
   //system initialization
- // SystemInitialization();
+  SystemInitialization();
   /* USER CODE END 2 */
 
   /* Call init function for freertos objects (in freertos.c) */
   MX_FREERTOS_Init();
-  SystemInitialization();
+
   /* Start scheduler */
   osKernelStart();
   
