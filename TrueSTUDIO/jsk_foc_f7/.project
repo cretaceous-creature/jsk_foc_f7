@@ -189,11 +189,6 @@
 			<location>PARENT-2-PROJECT_LOC/Src/stm32f7xx_it.c</location>
 		</link>
 		<link>
-			<name>Application/User/tim.c</name>
-			<type>1</type>
-			<location>PARENT-2-PROJECT_LOC/Src/tim.c</location>
-		</link>
-		<link>
 			<name>Application/User/usart.c</name>
 			<type>1</type>
 			<location>PARENT-2-PROJECT_LOC/Src/usart.c</location>
@@ -373,5 +368,9 @@
 			<type>1</type>
 			<location>PARENT-2-PROJECT_LOC/Jsk_foc/sysinitial.c</location>
 		</link>
-	</linkedResources>
+	<link>
+			<name>Application/User/tim.c</name>
+			<type>1</type>
+			<location>PARENT-2-PROJECT_LOC/Src/tim.c</location>
+		</link></linkedResources>
 </projectDescription>
