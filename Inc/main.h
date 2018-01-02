@@ -9,7 +9,7 @@
   * inserted by the user or by software development tools
   * are owned by their respective copyright owners.
   *
-  * Copyright (c) 2017 STMicroelectronics International N.V. 
+  * Copyright (c) 2018 STMicroelectronics International N.V. 
   * All rights reserved.
   *
   * Redistribution and use in source and binary forms, with or without 
@@ -52,7 +52,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "stdint.h"
 /* USER CODE END Includes */
 
 /* Private define ------------------------------------------------------------*/
@@ -72,7 +72,16 @@
 /* #define USE_FULL_ASSERT    1U */
 
 /* USER CODE BEGIN Private defines */
-
+typedef struct ENCHALLDATA
+{
+uint8_t mseq_out; //1bit
+uint8_t auxbit_in;//1bit
+uint8_t hole_in;//3bits
+uint8_t calc_tag;//2bits
+uint8_t enc_counter; //5bits
+uint8_t enc_high;//1byte
+uint8_t enc_low;//1byte
+}ENCHD;
 extern void SystemInitialization(void);
 /* USER CODE END Private defines */
 

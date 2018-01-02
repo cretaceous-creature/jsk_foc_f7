@@ -18,28 +18,21 @@
 #include "FreeRTOS.h"
 #include "task.h"
 #include "cmsis_os.h"
+#include "main.h"
 
 
 #define TXHEADER 0xF8
 //uart4 DMA data buffer
 //0xf8, 1xxx|xxxx, 011x|xxxx, byte, byte
 uint8_t enchall_buff[5];
-//data type struct
-struct ENCHALLDATA
-{
-uint8_t mseq_out; //1bit
-uint8_t auxbit_in;//1bit
-uint8_t hole_in;//3bits
-uint8_t calc_tag;//2bits
-uint8_t enc_counter; //5bits
-uint8_t enc_high;//1byte
-uint8_t enc_low;//1byte
-}enchall;
+static ENCHD enchall;
+//queue handle
+extern osMessageQId enchallQueueHandle;
 
 void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart)
 {
 	//error...
-//_Error_Handler("omg",11);
+	_Error_Handler("omg",11);
 }
 
 
@@ -57,9 +50,9 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 				{
 					//then we can obtain the correct bytes...
 					enchall.mseq_out = enchall_buff[s]&0x01;
-					enchall.auxbit_in = enchall_buff[s]&0x02;
-					enchall.hole_in = enchall_buff[s]&0x1c; //0001|1100
-					enchall.calc_tag = enchall_buff[s]&0x60; // 0110|0000
+					enchall.auxbit_in = (enchall_buff[s]&0x02)>>1;
+					enchall.hole_in = (enchall_buff[s]&0x1c)>>2; //0001|1100
+					enchall.calc_tag = (enchall_buff[s]&0x60)>>5; // 0110|0000
 					//next byte
 					enchall.enc_counter = enchall_buff[t]&0x1f; // 0001|1111
 					//next two bytes
@@ -67,6 +60,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 					uint8_t b2 = b1==4?0:b1+1;
 					enchall.enc_high = enchall_buff[b1]&0xff;
 					enchall.enc_low = enchall_buff[b2]&0xff;
+					xQueueSendFromISR(enchallQueueHandle,&enchall,0);
 				}
 			}
 		}

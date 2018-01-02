@@ -10,7 +10,7 @@
   * inserted by the user or by software development tools
   * are owned by their respective copyright owners.
   *
-  * Copyright (c) 2017 STMicroelectronics International N.V. 
+  * Copyright (c) 2018 STMicroelectronics International N.V. 
   * All rights reserved.
   *
   * Redistribution and use in source and binary forms, with or without 
@@ -118,7 +118,8 @@ void MX_USART1_UART_Init(void)
   huart1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
   huart1.Init.OverSampling = UART_OVERSAMPLING_16;
   huart1.Init.OneBitSampling = UART_ONE_BIT_SAMPLE_DISABLE;
-  huart1.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
+  huart1.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_RXOVERRUNDISABLE_INIT;
+  huart1.AdvancedInit.OverrunDisable = UART_ADVFEATURE_OVERRUN_DISABLE;
   if (HAL_UART_Init(&huart1) != HAL_OK)
   {
     _Error_Handler(__FILE__, __LINE__);

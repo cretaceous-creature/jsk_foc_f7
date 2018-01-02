@@ -9,7 +9,7 @@
   * inserted by the user or by software development tools
   * are owned by their respective copyright owners.
   *
-  * Copyright (c) 2017 STMicroelectronics International N.V. 
+  * Copyright (c) 2018 STMicroelectronics International N.V. 
   * All rights reserved.
   *
   * Redistribution and use in source and binary forms, with or without 
@@ -52,7 +52,7 @@
 #include "cmsis_os.h"
 
 /* USER CODE BEGIN Includes */     
-#include "gpio.h"
+#include "main.h"
 /* USER CODE END Includes */
 
 /* Variables -----------------------------------------------------------------*/
@@ -66,9 +66,11 @@ osThreadId buzzerrythmTaskHandle;
 osMessageQId buzzerQueueHandle;
 osMessageQId rythmQueueHandle;
 osMutexId buzzerMutexHandle;
+osMutexId encdataMutexHandle;
 
 /* USER CODE BEGIN Variables */
-
+//consider that the message size only be uint16 we create our own
+osMessageQId enchallQueueHandle;
 /* USER CODE END Variables */
 
 /* Function prototypes -------------------------------------------------------*/
@@ -99,6 +101,10 @@ void MX_FREERTOS_Init(void) {
   /* definition and creation of buzzerMutex */
   osMutexDef(buzzerMutex);
   buzzerMutexHandle = osMutexCreate(osMutex(buzzerMutex));
+
+  /* definition and creation of encdataMutex */
+  osMutexDef(encdataMutex);
+  encdataMutexHandle = osMutexCreate(osMutex(encdataMutex));
 
   /* USER CODE BEGIN RTOS_MUTEX */
   /* add mutexes, ... */
@@ -156,6 +162,9 @@ void MX_FREERTOS_Init(void) {
 
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
+  //add encoder and hall sensor queue..
+  osMessageQDef(enchallQueue, 1, ENCHD);
+  enchallQueueHandle = osMessageCreate(osMessageQ(enchallQueue), NULL);
   /* USER CODE END RTOS_QUEUES */
 }
 
