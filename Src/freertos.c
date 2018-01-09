@@ -65,12 +65,12 @@ osThreadId buzzertoneTaskHandle;
 osThreadId buzzerrythmTaskHandle;
 osMessageQId buzzerQueueHandle;
 osMessageQId rythmQueueHandle;
+osMessageQId enchallQueueHandle;
 osMutexId buzzerMutexHandle;
 osMutexId encdataMutexHandle;
 
 /* USER CODE BEGIN Variables */
-//consider that the message size only be uint16 we create our own
-osMessageQId enchallQueueHandle;
+
 /* USER CODE END Variables */
 
 /* Function prototypes -------------------------------------------------------*/
@@ -160,11 +160,13 @@ void MX_FREERTOS_Init(void) {
   osMessageQDef(rythmQueue, 32, uint16_t);
   rythmQueueHandle = osMessageCreate(osMessageQ(rythmQueue), NULL);
 
-  /* USER CODE BEGIN RTOS_QUEUES */
-  /* add queues, ... */
-  //add encoder and hall sensor queue..
+  /* definition and creation of enchallQueue */
   osMessageQDef(enchallQueue, 1, ENCHD);
   enchallQueueHandle = osMessageCreate(osMessageQ(enchallQueue), NULL);
+
+  /* USER CODE BEGIN RTOS_QUEUES */
+  /* add queues, ... */
+
   /* USER CODE END RTOS_QUEUES */
 }
 
