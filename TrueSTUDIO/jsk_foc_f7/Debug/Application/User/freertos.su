@@ -1,7 +1,7 @@
-freertos.c:187:13:StartshuntTask	8	static
 freertos.c:247:13:StartbuzzerrythmTask	8	static
 freertos.c:235:13:StartbuzzertoneTask	8	static
 freertos.c:174:13:StartenchallTask	8	static
+freertos.c:187:13:StartcontrolTask	8	static
 freertos.c:199:13:StartledblueTask	8	static
 freertos.c:211:13:StartledgreenTask	8	static
 freertos.c:223:13:StartiwdgTask	8	static

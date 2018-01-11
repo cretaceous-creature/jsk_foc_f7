@@ -28,12 +28,11 @@ uint8_t enchall_buff[5];
 static ENCHD enchall;
 
 //current data from dfsdm..
-int32_t cur_u;
-int32_t cur_v;
+static CURDATA motorcurrent;
 
 //queue handle
 extern osMessageQId enchallQueueHandle;
-extern osMutexId encdataMutexHandle;
+extern osMessageQId shuntQueueHandle;
 
 /***********
  * UART4 error handler
@@ -51,6 +50,14 @@ void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart)
  */
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
+	/*
+	 * firstly when the ISR is called it knows a the previous task A when the ISR is not triggered
+	 * if some other task B that has higher priority than A are being woken by the passing queue or semaphore,
+	 * the xHigherPriorityTaskWoken will be set to pdTrue and we can directly perform a context switch and thus
+	 * leaves the ISR and go to task B, if not so, we need to go back to task A and wait for a tick to switch to B.
+	 */
+	static BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+
 	if(huart->Instance==huart4.Instance) //not necessary to check..
 	{
 		for(int i=0; i<5; i++)
@@ -62,10 +69,10 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 				if(enchall_buff[s]&0x80&&enchall_buff[t]&0x60)
 				{
 					//then we can obtain the correct bytes...
-					enchall.mseq_out = enchall_buff[s]&0x01;
-					enchall.auxbit_in = (enchall_buff[s]&0x02)>>1;
+					enchall.mseq_out = (enchall_buff[s]&0x40)>>6; //0100|0000
+					enchall.auxbit_in = (enchall_buff[s]&0x20)>>5; //0010|0000
 					enchall.hole_in = (enchall_buff[s]&0x1c)>>2; //0001|1100
-					enchall.calc_tag = (enchall_buff[s]&0x60)>>5; // 0110|0000
+					enchall.calc_tag = enchall_buff[s]&0x03; // 0000|0011
 					//next byte
 					enchall.enc_counter = enchall_buff[t]&0x1f; // 0001|1111
 					//next two bytes
@@ -73,26 +80,31 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 					uint8_t b2 = b1==4?0:b1+1;
 					enchall.enc_high = enchall_buff[b1]&0xff;
 					enchall.enc_low = enchall_buff[b2]&0xff;
-					if(xSemaphoreTakeFromISR(encdataMutexHandle,0)==pdPASS)
-					{
-						xQueueSendFromISR(enchallQueueHandle,&enchall,0);
-						xSemaphoreGiveFromISR(encdataMutexHandle,0);
-					}
-					volatile int32_t data1,data2;
+					//send the queue to tasks...
+					//since we need to always refresh the data, need to use overwrite, only return pass
+					xQueueOverwriteFromISR(enchallQueueHandle,&enchall, &xHigherPriorityTaskWoken);
+					//send the DFSDM current sensing data.
 					if(HAL_DFSDM_FilterPollForRegConversion(&hdfsdm1_filter0,0) == HAL_OK &&
 							HAL_DFSDM_FilterPollForRegConversion(&hdfsdm1_filter1,0) == HAL_OK)
 					{
-						data1 = HAL_DFSDM_FilterGetRegularValue(&hdfsdm1_filter0,(uint32_t *)&hdfsdm1_channel0);
-						data2 = HAL_DFSDM_FilterGetRegularValue(&hdfsdm1_filter1,(uint32_t *)&hdfsdm1_channel3);
-						HAL_GPIO_TogglePin(GPIOC,GPIO_PIN_12);
+						//also we need to deal with the offset by shorting the shunt sensor..
+						motorcurrent.cur_b = HAL_DFSDM_FilterGetRegularValue(&hdfsdm1_filter0,(uint32_t *)&hdfsdm1_channel0);
+						motorcurrent.cur_a = HAL_DFSDM_FilterGetRegularValue(&hdfsdm1_filter1,(uint32_t *)&hdfsdm1_channel3);
+						// f 256, I 2,  a: 8600 b:18400;  1ma = 100
+						// f 128, I 2,  a:1200 b:2300;   1ma = 100/(2^3) = 12.5
+						motorcurrent.cur_a -= 8600;
+						motorcurrent.cur_b -= 18400;
+						motorcurrent.cur_c = - motorcurrent.cur_a - motorcurrent.cur_b;
+						xQueueSendFromISR(shuntQueueHandle,&motorcurrent,&xHigherPriorityTaskWoken);
 					}
-					b2= data1 + data2;
 				}
 			}
 		}
 		//continue DMA
 		HAL_UART_DMAResume(&huart4);
 	}
+	//call a context switch if needed..
+	portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
 }
 
 /***********

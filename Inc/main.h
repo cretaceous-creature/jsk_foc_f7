@@ -72,16 +72,25 @@
 /* #define USE_FULL_ASSERT    1U */
 
 /* USER CODE BEGIN Private defines */
+//encoder data
 typedef struct ENCHALLDATA
 {
 uint8_t mseq_out; //1bit
 uint8_t auxbit_in;//1bit
 uint8_t hole_in;//3bits
 uint8_t calc_tag;//2bits
-uint8_t enc_counter; //5bits
-uint8_t enc_high;//1byte
+uint8_t enc_counter; //5bits  lower 5bits of 16bits of 2000 counts
+uint8_t enc_high;//1byte   obsolute encoder..
 uint8_t enc_low;//1byte
 }ENCHD;
+//current data
+typedef struct CURRENTDATA
+{
+	int32_t cur_a; //u
+	int32_t cur_b; //v
+	int32_t cur_c; //w
+	//cur_c = -cur_a-cur_b
+}CURDATA;
 extern void SystemInitialization(void);
 /* USER CODE END Private defines */
 

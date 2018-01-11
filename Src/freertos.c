@@ -57,7 +57,7 @@
 
 /* Variables -----------------------------------------------------------------*/
 osThreadId enchallTaskHandle;
-osThreadId shuntTaskHandle;
+osThreadId controlTaskHandle;
 osThreadId ledblueTaskHandle;
 osThreadId ledgreenTaskHandle;
 osThreadId iwdgTaskHandle;
@@ -66,8 +66,8 @@ osThreadId buzzerrythmTaskHandle;
 osMessageQId buzzerQueueHandle;
 osMessageQId rythmQueueHandle;
 osMessageQId enchallQueueHandle;
+osMessageQId shuntQueueHandle;
 osMutexId buzzerMutexHandle;
-osMutexId encdataMutexHandle;
 
 /* USER CODE BEGIN Variables */
 
@@ -75,7 +75,7 @@ osMutexId encdataMutexHandle;
 
 /* Function prototypes -------------------------------------------------------*/
 void StartenchallTask(void const * argument);
-void StartshuntTask(void const * argument);
+void StartcontrolTask(void const * argument);
 void StartledblueTask(void const * argument);
 void StartledgreenTask(void const * argument);
 void StartiwdgTask(void const * argument);
@@ -102,10 +102,6 @@ void MX_FREERTOS_Init(void) {
   osMutexDef(buzzerMutex);
   buzzerMutexHandle = osMutexCreate(osMutex(buzzerMutex));
 
-  /* definition and creation of encdataMutex */
-  osMutexDef(encdataMutex);
-  encdataMutexHandle = osMutexCreate(osMutex(encdataMutex));
-
   /* USER CODE BEGIN RTOS_MUTEX */
   /* add mutexes, ... */
   /* USER CODE END RTOS_MUTEX */
@@ -123,9 +119,9 @@ void MX_FREERTOS_Init(void) {
   osThreadDef(enchallTask, StartenchallTask, osPriorityNormal, 0, 128);
   enchallTaskHandle = osThreadCreate(osThread(enchallTask), NULL);
 
-  /* definition and creation of shuntTask */
-  osThreadDef(shuntTask, StartshuntTask, osPriorityBelowNormal, 0, 128);
-  shuntTaskHandle = osThreadCreate(osThread(shuntTask), NULL);
+  /* definition and creation of controlTask */
+  osThreadDef(controlTask, StartcontrolTask, osPriorityAboveNormal, 0, 128);
+  controlTaskHandle = osThreadCreate(osThread(controlTask), NULL);
 
   /* definition and creation of ledblueTask */
   osThreadDef(ledblueTask, StartledblueTask, osPriorityIdle, 0, 128);
@@ -164,6 +160,10 @@ void MX_FREERTOS_Init(void) {
   osMessageQDef(enchallQueue, 1, ENCHD);
   enchallQueueHandle = osMessageCreate(osMessageQ(enchallQueue), NULL);
 
+  /* definition and creation of shuntQueue */
+  osMessageQDef(shuntQueue, 1, CURDATA);
+  shuntQueueHandle = osMessageCreate(osMessageQ(shuntQueue), NULL);
+
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
 
@@ -183,16 +183,16 @@ __weak void StartenchallTask(void const * argument)
   /* USER CODE END StartenchallTask */
 }
 
-/* StartshuntTask function */
-__weak void StartshuntTask(void const * argument)
+/* StartcontrolTask function */
+__weak void StartcontrolTask(void const * argument)
 {
-  /* USER CODE BEGIN StartshuntTask */
+  /* USER CODE BEGIN StartcontrolTask */
   /* Infinite loop */
   for(;;)
   {
-    osDelay(5);
+    osDelay(1);
   }
-  /* USER CODE END StartshuntTask */
+  /* USER CODE END StartcontrolTask */
 }
 
 /* StartledblueTask function */

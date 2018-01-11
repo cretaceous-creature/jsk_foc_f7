@@ -73,7 +73,7 @@ void MX_DFSDM1_Init(void)
   hdfsdm1_filter0.Init.RegularParam.FastMode = ENABLE;
   hdfsdm1_filter0.Init.RegularParam.DmaMode = ENABLE;
   hdfsdm1_filter0.Init.FilterParam.SincOrder = DFSDM_FILTER_SINC3_ORDER;
-  hdfsdm1_filter0.Init.FilterParam.Oversampling = 64;
+  hdfsdm1_filter0.Init.FilterParam.Oversampling = 256;
   hdfsdm1_filter0.Init.FilterParam.IntOversampling = 2;
   HAL_DFSDM_FilterInit(&hdfsdm1_filter0);
 
@@ -82,7 +82,7 @@ void MX_DFSDM1_Init(void)
   hdfsdm1_filter1.Init.RegularParam.FastMode = ENABLE;
   hdfsdm1_filter1.Init.RegularParam.DmaMode = ENABLE;
   hdfsdm1_filter1.Init.FilterParam.SincOrder = DFSDM_FILTER_SINC3_ORDER;
-  hdfsdm1_filter1.Init.FilterParam.Oversampling = 64;
+  hdfsdm1_filter1.Init.FilterParam.Oversampling = 256;
   hdfsdm1_filter1.Init.FilterParam.IntOversampling = 2;
   HAL_DFSDM_FilterInit(&hdfsdm1_filter1);
 

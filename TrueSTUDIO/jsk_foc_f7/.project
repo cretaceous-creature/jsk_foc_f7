@@ -124,6 +124,11 @@
 			<location>PARENT-1-PROJECT_LOC/startup_stm32f765xx.s</location>
 		</link>
 		<link>
+			<name>Application/User/Foc</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
 			<name>Application/User/ISRs</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
@@ -362,6 +367,11 @@
 			<name>Middlewares/FreeRTOS/timers.c</name>
 			<type>1</type>
 			<location>PARENT-2-PROJECT_LOC/Middlewares/Third_Party/FreeRTOS/Source/timers.c</location>
+		</link>
+		<link>
+			<name>Application/User/Foc/controlFoc.c</name>
+			<type>1</type>
+			<location>PARENT-2-PROJECT_LOC/Jsk_foc/controlFoc.c</location>
 		</link>
 		<link>
 			<name>Application/User/ISRs/isrSensors.c</name>
