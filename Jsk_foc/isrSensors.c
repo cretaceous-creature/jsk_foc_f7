@@ -25,7 +25,11 @@
 //0xf8, 1xxx|xxxx, 011x|xxxx, byte, byte
 #define TXHEADER 0xF8
 uint8_t enchall_buff[5];
-static ENCHD enchall;
+static ENCHD enchall = {.recon_counter=5000};
+static uint16_t last5bitsdata;
+#define MAX_COUNT 2000
+#define ALLONECOUNT 1984
+//only when triggered the position event then the encoder count is valid
 
 //current data from dfsdm..
 static CURDATA motorcurrent;
@@ -80,6 +84,27 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 					uint8_t b2 = b1==4?0:b1+1;
 					enchall.enc_high = enchall_buff[b1]&0xff;
 					enchall.enc_low = enchall_buff[b2]&0xff;
+					//process the data... change to from 0-2000 encoder count..
+					if(enchall.calc_tag == 2) //all 0
+					{
+						enchall.recon_counter = enchall.enc_counter;  //only 5bits OK
+					}
+					else if(enchall.calc_tag == 3) //all 1
+					{
+						enchall.recon_counter = ALLONECOUNT + enchall.enc_counter;
+					}
+					else
+					{
+						if(enchall.enc_counter-last5bitsdata>16) //overflowed..
+							enchall.recon_counter = (enchall.recon_counter - 32)&0xFFE0|enchall.enc_counter;
+						else if(enchall.enc_counter-last5bitsdata<-16)
+							enchall.recon_counter = (enchall.recon_counter + 32)&0xFFE0|enchall.enc_counter;
+						else //not overflow
+							enchall.recon_counter = enchall.recon_counter&0xFFE0|enchall.enc_counter;
+					}
+					//get the last data..
+					last5bitsdata = enchall.enc_counter;
+
 					//send the queue to tasks...
 					//since we need to always refresh the data, need to use overwrite, only return pass
 					xQueueOverwriteFromISR(enchallQueueHandle,&enchall, &xHigherPriorityTaskWoken);

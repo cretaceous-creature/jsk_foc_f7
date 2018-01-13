@@ -39,6 +39,11 @@ void StartenchallTask(void const * argument)
 		  datatosend[++i] = encdata.enc_counter/10 + 0x30; //msb unit
 		  datatosend[++i] = encdata.enc_counter%10 + 0x30; //lsb unit
 		  datatosend[++i] = '\t';
+		  datatosend[++i] = encdata.recon_counter/1000 + 0x30; //msb unit
+		  datatosend[++i] = encdata.recon_counter%1000/100 + 0x30;
+		  datatosend[++i] = encdata.recon_counter%100/10 + 0x30;
+		  datatosend[++i] = encdata.recon_counter%10 + 0x30;
+		  datatosend[++i] = '\t';
 		  datatosend[++i] = '\r';
 		  datatosend[++i] = '\n';
 		  HAL_UART_Transmit(&huart1,datatosend,i,10);
