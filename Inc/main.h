@@ -82,6 +82,7 @@ uint8_t calc_tag;//2bits
 uint8_t enc_counter; //5bits  lower 5bits of 16bits of 2000 counts
 uint8_t enc_high;//1byte   obsolute encoder..
 uint8_t enc_low;//1byte
+uint16_t recon_counter;// 0~2000. default 5000.. means uinitialized..
 }ENCHD;
 //current data
 typedef struct CURRENTDATA
