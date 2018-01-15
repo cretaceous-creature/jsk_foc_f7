@@ -17,6 +17,7 @@
 #include "main.h"
 #include "math.h"
 extern osMessageQId shuntQueueHandle;
+extern osMessageQId enchallQueueHandle;
 //this API should run at a frequency of
 // Fovsr*Iovsr*0.1us +- (half encoder data period)
 // 256*2*0.1us +- 4us = 51.2 +- 4 us..
@@ -27,6 +28,9 @@ extern osMessageQId shuntQueueHandle;
 		htim1.Instance->CCR3=dutyC;}
 
 #define sq3 1.732051
+#define CENTERCOUNT 500
+#define MAXCOUNT 2000
+#define PI 3.1416
 /*
  * clarke transform: 3 120 phase to 2 orthogonal phase
  */
@@ -75,6 +79,7 @@ void StartcontrolTask(void const * argument)
 	for(;;)
 	{
 		CURDATA shuntdata;
+		ENCHD encdata;
 		if(xQueueReceive(shuntQueueHandle,&shuntdata,2)==pdPASS)
 		{
 			//copy the data use float type.
@@ -83,11 +88,24 @@ void StartcontrolTask(void const * argument)
 			float c_b = ((float)shuntdata.cur_b)/100;
 			float c_c = ((float)shuntdata.cur_c)/100;
 			//now the unity is 1 for 1ma..
+
+			//obtain the encoder angle
+			if(xQueuePeek(enchallQueueHandle,&encdata,0)!=pdPASS)
+				return;
 			//clarke
 			float c_apha, c_beta;
 			ClarkeTrans(c_a, c_b, &c_apha, &c_beta);
 			//then park...
+			float theta = -2 * PI * (encdata.recon_counter-CENTERCOUNT) / MAXCOUNT;
+			float c_d, c_q;
+			ParkTrans(c_apha,c_beta,theta,&c_d,&c_q);
 
+			//PID control
+
+			//reverse park...
+//			RevParkTrans();
+			//reverse clarke
+//			RevClarkeTrans();
 
 //			setMotorDuty(duty_a,0,0);
 			//to test the control frequency
