@@ -83,6 +83,9 @@ uint8_t enc_counter; //5bits  lower 5bits of 16bits of 2000 counts
 uint8_t enc_high;//1byte   obsolute encoder..
 uint8_t enc_low;//1byte
 uint16_t recon_counter;// 0~2000. default 5000.. means uinitialized..
+uint8_t Kp;
+uint8_t Ki;
+int16_t target_cur;
 }ENCHD;
 //current data
 typedef struct CURRENTDATA
@@ -90,8 +93,21 @@ typedef struct CURRENTDATA
 	int32_t cur_a; //u
 	int32_t cur_b; //v
 	int32_t cur_c; //w
+	uint8_t Kp;
+	uint8_t Ki;
+	int16_t target_cur;
 	//cur_c = -cur_a-cur_b
 }CURDATA;
+//PID control result
+typedef struct CONRESULT
+{
+	int16_t feedback_cq;
+	int16_t feedback_cd;
+	int16_t duty_a;
+	uint16_t duty_b;
+	uint16_t duty_c;
+}CONRES;
+
 extern void SystemInitialization(void);
 /* USER CODE END Private defines */
 

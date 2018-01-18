@@ -1,8 +1,8 @@
-freertos.c:247:13:StartbuzzerrythmTask	8	static
-freertos.c:235:13:StartbuzzertoneTask	8	static
-freertos.c:174:13:StartenchallTask	8	static
-freertos.c:187:13:StartcontrolTask	8	static
-freertos.c:199:13:StartledblueTask	8	static
-freertos.c:211:13:StartledgreenTask	8	static
-freertos.c:223:13:StartiwdgTask	8	static
-freertos.c:95:6:MX_FREERTOS_Init	200	static
+freertos.c:252:13:StartbuzzerrythmTask	8	static
+freertos.c:240:13:StartbuzzertoneTask	8	static
+freertos.c:179:13:StartenchallTask	8	static
+freertos.c:192:13:StartcontrolTask	8	static
+freertos.c:204:13:StartledblueTask	8	static
+freertos.c:216:13:StartledgreenTask	8	static
+freertos.c:228:13:StartiwdgTask	8	static
+freertos.c:96:6:MX_FREERTOS_Init	208	static
