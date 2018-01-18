@@ -67,6 +67,7 @@ osMessageQId buzzerQueueHandle;
 osMessageQId rythmQueueHandle;
 osMessageQId enchallQueueHandle;
 osMessageQId shuntQueueHandle;
+osMessageQId conresQueueHandle;
 osMutexId buzzerMutexHandle;
 
 /* USER CODE BEGIN Variables */
@@ -163,6 +164,10 @@ void MX_FREERTOS_Init(void) {
   /* definition and creation of shuntQueue */
   osMessageQDef(shuntQueue, 1, CURDATA);
   shuntQueueHandle = osMessageCreate(osMessageQ(shuntQueue), NULL);
+
+  /* definition and creation of conresQueue */
+  osMessageQDef(conresQueue, 1, CONRES);
+  conresQueueHandle = osMessageCreate(osMessageQ(conresQueue), NULL);
 
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */

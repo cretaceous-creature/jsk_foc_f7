@@ -24,8 +24,9 @@
 
 //databuff
 extern uint8_t enchall_buff[5];
-extern int32_t cur_u;
-extern int32_t cur_v;
+extern uint8_t order_buff[5];
+//int32_t cur_u;
+//int32_t cur_v;
 
 void SystemInitialization(void)
 {
@@ -49,6 +50,7 @@ void SystemInitialization(void)
 	 */
 	//HAL_DMA_RegisterCallback(&hdma_uart4_rx,HAL_DMA_XFER_CPLTUART4_DMA2_Cplt_Callback);
 	HAL_UART_Receive_DMA(&huart4,enchall_buff,5);
+	HAL_UART_Receive_DMA(&huart1,order_buff,5);
 
 	/*
 	 * DFSDM initial

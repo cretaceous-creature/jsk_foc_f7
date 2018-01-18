@@ -31,8 +31,14 @@ static uint16_t last5bitsdata;
 #define ALLONECOUNT 1984
 //only when triggered the position event then the encoder count is valid
 
+//usart1 DMA data buffer
+// 0xf8 1xxx|xxxx 01xx|xxxx byte byte
+#define HEAD2 0x80  //1xxx xxxx   Kp = 128~255 - 128
+#define HEAD3 0x60  //01xx xxxx   Ki  64~128 - 64
+uint8_t order_buff[5];
+
 //current data from dfsdm..
-static CURDATA motorcurrent;
+static CURDATA motorcurrent = {.Kp=0,.Ki=0,.target_cur=0};
 
 //queue handle
 extern osMessageQId enchallQueueHandle;
@@ -44,7 +50,7 @@ extern osMessageQId shuntQueueHandle;
 void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart)
 {
 	//error...
-	_Error_Handler("isrSensors.c, uart error",41);
+	_Error_Handler("isrSensors.c, uart error",53);
 }
 
 /***********
@@ -60,10 +66,10 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 	 * the xHigherPriorityTaskWoken will be set to pdTrue and we can directly perform a context switch and thus
 	 * leaves the ISR and go to task B, if not so, we need to go back to task A and wait for a tick to switch to B.
 	 */
-	static BaseType_t xHigherPriorityTaskWoken = pdFALSE;
 
 	if(huart->Instance==huart4.Instance) //not necessary to check..
 	{
+		static BaseType_t xHigherPriorityTaskWoken = pdFALSE;
 		for(int i=0; i<5; i++)
 		{
 			if(enchall_buff[i] == TXHEADER)
@@ -127,9 +133,40 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 		}
 		//continue DMA
 		HAL_UART_DMAResume(&huart4);
+			//call a context switch if needed..
+		portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
 	}
-	//call a context switch if needed..
-	portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+
+	//USART 1 DMA interrupt
+	else if(huart->Instance==huart1.Instance)
+	{
+		for(int i=0; i<5; i++)
+		{
+			if(order_buff[i] == TXHEADER)
+			{
+				uint8_t s = i==4?0:i+1; //second byte  1xxx|xxxx
+				uint8_t t = s==4?0:s+1; //third byte   011x|xxxx
+				if(order_buff[s]&0x80&&order_buff[t]&0x60)
+				{
+					//then we can obtain the correct bytes...
+					motorcurrent.Kp = order_buff[s] & 0x7f;
+					motorcurrent.Ki = order_buff[t] & 0x1f;
+					//next two bytes
+					uint8_t b1 = t==4?0:t+1;
+					uint8_t b2 = b1==4?0:b1+1;
+					motorcurrent.target_cur =  (((int16_t)order_buff[b2]&0x7f) << 8) | order_buff[b1];
+					if(order_buff[b2]&0x80) //minus
+						motorcurrent.target_cur = -motorcurrent.target_cur;
+
+					enchall.Kp = motorcurrent.Kp;
+					enchall.Ki = motorcurrent.Ki;
+					enchall.target_cur = motorcurrent.target_cur;
+				}
+			}
+		}
+		//continue DMA
+		HAL_UART_DMAResume(&huart1);
+	}
 }
 
 /***********
