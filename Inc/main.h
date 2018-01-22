@@ -86,6 +86,7 @@ uint16_t recon_counter;// 0~2000. default 5000.. means uinitialized..
 uint8_t Kp;
 uint8_t Ki;
 int16_t target_cur;
+uint16_t z_count;
 }ENCHD;
 //current data
 typedef struct CURRENTDATA
@@ -96,6 +97,7 @@ typedef struct CURRENTDATA
 	uint8_t Kp;
 	uint8_t Ki;
 	int16_t target_cur;
+	int8_t centeroffset;
 	//cur_c = -cur_a-cur_b
 }CURDATA;
 //PID control result

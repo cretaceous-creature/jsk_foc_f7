@@ -37,6 +37,12 @@ void SystemInitialization(void)
 
 	/*
 	 * tim1 pwm initialization
+	 * About the dead time...
+	 * according to the datasheet the recovery time is about 114ns..
+	 * thus if we consider the driver delay and blabla...
+	 * we choose the dead time to be 200ns~...
+	 * lookinto the tim.c file the dead time is calculated by
+	 * 1/216mhz * DeadTime,  thus we choose DeadTime to be 45~
 	 */
 	HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_1);
 	HAL_TIMEx_PWMN_Start(&htim1,TIM_CHANNEL_1);
@@ -50,7 +56,7 @@ void SystemInitialization(void)
 	 */
 	//HAL_DMA_RegisterCallback(&hdma_uart4_rx,HAL_DMA_XFER_CPLTUART4_DMA2_Cplt_Callback);
 	HAL_UART_Receive_DMA(&huart4,enchall_buff,5);
-	HAL_UART_Receive_DMA(&huart1,order_buff,5);
+	HAL_UART_Receive_DMA(&huart1,order_buff,6);
 
 	/*
 	 * DFSDM initial

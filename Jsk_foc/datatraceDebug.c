@@ -27,12 +27,23 @@ void StartenchallTask(void const * argument)
 	  ENCHD encdata;
 	  CONRES conresdata;
 	  uint8_t datatosend[80];
+	  uint16_t last_count,vel;
 	  //We dont wanna read out and destory the data in the queue therefore use xQueuePeek
 	  if(xQueuePeek(enchallQueueHandle,&encdata,0)==pdPASS)
 	  {
 		  int i = 0;
 		  datatosend[i] = 'H';datatosend[++i] = ':';
 		  datatosend[++i] = encdata.hole_in + 0x30; //3bits
+		  datatosend[++i] = '\t';
+		  //get the z phase count
+		  vel = encdata.z_count - last_count;
+		  if(vel<0)
+			  vel += 65536;
+		  last_count = encdata.z_count;
+		  datatosend[++i] = 'V';datatosend[++i] = ':';
+		  datatosend[++i] = vel%1000/100 + 0x30; //3bits
+		  datatosend[++i] = vel%100/10 + 0x30; //3bits
+		  datatosend[++i] = vel%10 + 0x30; //3bits
 		  datatosend[++i] = '\t';
 //		  datatosend[++i] = encdata.calc_tag + 0x30; //2bits
 //		  datatosend[++i] = '\t';
@@ -122,7 +133,6 @@ void StartenchallTask(void const * argument)
 			  datatosend[++i] = conresdata.duty_c%10 + 0x30;
 		  }
 
-
 		  datatosend[++i] = '\t';
 		  datatosend[++i] = '\r';
 		  datatosend[++i] = '\n';
@@ -130,7 +140,7 @@ void StartenchallTask(void const * argument)
 		  HAL_UART_Transmit(&huart1,datatosend,i,50);
 		  __HAL_LOCK(&huart1);
 	  }
-	  //every 5 mini
+	  //every 100mini
 	  osDelay(100);
   }
 }

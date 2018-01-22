@@ -24,7 +24,8 @@
 //uart4 DMA data buffer
 //0xf8, 1xxx|xxxx, 011x|xxxx, byte, byte
 #define TXHEADER 0xF8
-uint8_t enchall_buff[5];
+#define UART4BYTE 5
+uint8_t enchall_buff[UART4BYTE];
 static ENCHD enchall = {.recon_counter=5000};
 static uint16_t last5bitsdata;
 #define MAX_COUNT 2000
@@ -35,10 +36,10 @@ static uint16_t last5bitsdata;
 // 0xf8 1xxx|xxxx 01xx|xxxx byte byte
 #define HEAD2 0x80  //1xxx xxxx   Kp = 128~255 - 128
 #define HEAD3 0x60  //01xx xxxx   Ki  64~128 - 64
-uint8_t order_buff[5];
-
+#define UART1BYTE 6
+uint8_t order_buff[UART1BYTE];
 //current data from dfsdm..
-static CURDATA motorcurrent = {.Kp=0,.Ki=0,.target_cur=0};
+static CURDATA motorcurrent = {.Kp=0,.Ki=0,.target_cur=0,.centeroffset=0};
 
 //queue handle
 extern osMessageQId enchallQueueHandle;
@@ -70,12 +71,12 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 	if(huart->Instance==huart4.Instance) //not necessary to check..
 	{
 		static BaseType_t xHigherPriorityTaskWoken = pdFALSE;
-		for(int i=0; i<5; i++)
+		for(int i=0; i<UART4BYTE; i++)
 		{
 			if(enchall_buff[i] == TXHEADER)
 			{
-				uint8_t s = i==4?0:i+1; //second byte  1xxx|xxxx
-				uint8_t t = s==4?0:s+1; //third byte   011x|xxxx
+				uint8_t s = i==UART4BYTE-1?0:i+1; //second byte  1xxx|xxxx
+				uint8_t t = s==UART4BYTE-1?0:s+1; //third byte   011x|xxxx
 				if(enchall_buff[s]&0x80&&enchall_buff[t]&0x60)
 				{
 					//then we can obtain the correct bytes...
@@ -86,14 +87,15 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 					//next byte
 					enchall.enc_counter = enchall_buff[t]&0x1f; // 0001|1111
 					//next two bytes
-					uint8_t b1 = t==4?0:t+1;
-					uint8_t b2 = b1==4?0:b1+1;
+					uint8_t b1 = t==UART4BYTE-1?0:t+1;
+					uint8_t b2 = b1==UART4BYTE-1?0:b1+1;
 					enchall.enc_high = enchall_buff[b1]&0xff;
 					enchall.enc_low = enchall_buff[b2]&0xff;
 					//process the data... change to from 0-2000 encoder count..
 					if(enchall.calc_tag == 2) //all 0
 					{
 						enchall.recon_counter = enchall.enc_counter;  //only 5bits OK
+						enchall.z_count++;
 					}
 					else if(enchall.calc_tag == 3) //all 1
 					{
@@ -140,23 +142,27 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 	//USART 1 DMA interrupt
 	else if(huart->Instance==huart1.Instance)
 	{
-		for(int i=0; i<5; i++)
+		for(int i=0; i<UART1BYTE; i++)
 		{
 			if(order_buff[i] == TXHEADER)
 			{
-				uint8_t s = i==4?0:i+1; //second byte  1xxx|xxxx
-				uint8_t t = s==4?0:s+1; //third byte   011x|xxxx
+				uint8_t s = i==UART1BYTE-1?0:i+1; //second byte  1xxx|xxxx
+				uint8_t t = s==UART1BYTE-1?0:s+1; //third byte   011x|xxxx
 				if(order_buff[s]&0x80&&order_buff[t]&0x60)
 				{
 					//then we can obtain the correct bytes...
 					motorcurrent.Kp = order_buff[s] & 0x7f;
 					motorcurrent.Ki = order_buff[t] & 0x1f;
 					//next two bytes
-					uint8_t b1 = t==4?0:t+1;
-					uint8_t b2 = b1==4?0:b1+1;
+					uint8_t b1 = t==UART1BYTE-1?0:t+1;
+					uint8_t b2 = b1==UART1BYTE-1?0:b1+1;
 					motorcurrent.target_cur =  (((int16_t)order_buff[b2]&0x7f) << 8) | order_buff[b1];
 					if(order_buff[b2]&0x80) //minus
 						motorcurrent.target_cur = -motorcurrent.target_cur;
+					uint8_t b3 = b2==UART1BYTE-1?0:b2+1;
+					motorcurrent.centeroffset = order_buff[b3]&0x7f;
+					if(order_buff[b3]&0x80) //minus
+						motorcurrent.centeroffset = -motorcurrent.centeroffset;
 
 					enchall.Kp = motorcurrent.Kp;
 					enchall.Ki = motorcurrent.Ki;

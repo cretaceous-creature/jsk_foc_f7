@@ -126,7 +126,8 @@ void StartcontrolTask(void const * argument)
 			volatile float c_apha, c_beta;
 			ClarkeTrans(c_a, c_b, &c_apha, &c_beta);
 			//then park...
-			volatile float theta = 4 * PI * (encdata.recon_counter-CENTERCOUNT) / MAXCOUNT;
+			volatile float theta = 4 * PI * (encdata.recon_counter - CENTERCOUNT
+					+ shuntdata.centeroffset) / MAXCOUNT;
 			volatile float c_d, c_q;
 			ParkTrans(c_apha,c_beta,theta,&c_d,&c_q);
 
