@@ -36,9 +36,9 @@ void StartenchallTask(void const * argument)
 		  datatosend[++i] = encdata.hole_in + 0x30; //3bits
 		  datatosend[++i] = '\t';
 		  //get the z phase count
-		  vel = encdata.z_count - last_count;
-		  if(vel<0)
-			  vel += 65536;
+		  vel = encdata.z_count - last_count<0?encdata.z_count - last_count+65535:
+				  encdata.z_count - last_count;
+		  vel *= 10;
 		  last_count = encdata.z_count;
 		  datatosend[++i] = 'V';datatosend[++i] = ':';
 		  datatosend[++i] = vel%1000/100 + 0x30; //3bits

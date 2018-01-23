@@ -40,9 +40,9 @@ void SystemInitialization(void)
 	 * About the dead time...
 	 * according to the datasheet the recovery time is about 114ns..
 	 * thus if we consider the driver delay and blabla...
-	 * we choose the dead time to be 200ns~...
+	 * we choose the dead time to be 300ns~...
 	 * lookinto the tim.c file the dead time is calculated by
-	 * 1/216mhz * DeadTime,  thus we choose DeadTime to be 45~
+	 * 1/216mhz * DeadTime,  thus we choose DeadTime to be 66~
 	 */
 	HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_1);
 	HAL_TIMEx_PWMN_Start(&htim1,TIM_CHANNEL_1);
@@ -64,7 +64,4 @@ void SystemInitialization(void)
 	//polling mode
 	HAL_DFSDM_FilterRegularStart(&hdfsdm1_filter0);
 	HAL_DFSDM_FilterRegularStart(&hdfsdm1_filter1);
-	//DMA mode
-//	HAL_DFSDM_FilterRegularStart_DMA(&hdfsdm1_filter0,&cur_u,1);
-//	HAL_DFSDM_FilterRegularStart_DMA(&hdfsdm1_filter1,&cur_v,1);
 }

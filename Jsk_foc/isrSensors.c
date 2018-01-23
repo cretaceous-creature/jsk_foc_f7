@@ -26,7 +26,7 @@
 #define TXHEADER 0xF8
 #define UART4BYTE 5
 uint8_t enchall_buff[UART4BYTE];
-static ENCHD enchall = {.recon_counter=5000};
+static ENCHD enchall = {.recon_counter=5000,.z_count=0};
 static uint16_t last5bitsdata;
 #define MAX_COUNT 2000
 #define ALLONECOUNT 1984
@@ -40,7 +40,7 @@ static uint16_t last5bitsdata;
 uint8_t order_buff[UART1BYTE];
 //current data from dfsdm..
 static CURDATA motorcurrent = {.Kp=0,.Ki=0,.target_cur=0,.centeroffset=0};
-
+static uint8_t flag = 0;
 //queue handle
 extern osMessageQId enchallQueueHandle;
 extern osMessageQId shuntQueueHandle;
@@ -95,11 +95,13 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 					if(enchall.calc_tag == 2) //all 0
 					{
 						enchall.recon_counter = enchall.enc_counter;  //only 5bits OK
-						enchall.z_count++;
+						flag = 1;
 					}
 					else if(enchall.calc_tag == 3) //all 1
 					{
 						enchall.recon_counter = ALLONECOUNT + enchall.enc_counter;
+						if(flag)
+						{enchall.z_count++;flag=0;}
 					}
 					else
 					{
@@ -175,21 +177,3 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 	}
 }
 
-/***********
- * DFSDM DMA call back no need to use cpu..
- * ireserved... now use cpu to read the data..j
- * put the data into the queue.
- */
-void HAL_DFSDM_FilterRegConvCpltCallback(DFSDM_Filter_HandleTypeDef *hdfsdm_filter)
-{
-	if(hdfsdm_filter->Instance == hdfsdm1_filter0.Instance)
-	{
-
-	}
-	else if(hdfsdm_filter->Instance == hdfsdm1_filter1.Instance)
-	{
-
-	}
-	else
-		_Error_Handler("isrSensor.c, hdfsdm DMA problem", 120);
-}

@@ -25,8 +25,6 @@ extern osMessageQId conresQueueHandle;
 //PWM  50Khz, 20us, duty should be from 0~2160..
 //centralaligned, frequency should be half..
 #define MAXDUTY 2160
-#define VOLTSUP 12
-#define PHASERES 0.21/3
 #define setMotorDuty(dutyA,dutyB,dutyC) {htim1.Instance->CCR1=dutyA, \
 		htim1.Instance->CCR2=dutyB, \
 		htim1.Instance->CCR3=dutyC;}
@@ -84,11 +82,11 @@ inline void SVMDuty(volatile float *v_a, volatile float *v_b, volatile float *v_
 	*v_c -= v_big;
 	v_small = *v_a<*v_b?*v_a:*v_b;
 	v_small = v_small<*v_c?v_small:*v_c;
-	if(v_small<-MAXDUTY+1) // <-2159..
+	if(v_small<-MAXDUTY) // <-2159..
 	{
-		*v_a *= -(MAXDUTY-1)/v_small;
-		*v_b *= -(MAXDUTY-1)/v_small;
-		*v_c *= -(MAXDUTY-1)/v_small;  //then the data is proportional under maxduty
+		*v_a *= -(MAXDUTY)/v_small;
+		*v_b *= -(MAXDUTY)/v_small;
+		*v_c *= -(MAXDUTY)/v_small;  //then the data is proportional under maxduty
 	}
 
 }
@@ -158,7 +156,7 @@ void StartcontrolTask(void const * argument)
 			volatile float v_q = shuntdata.Kp * er_q + shuntdata.Ki * integra_Cq * 51.2 * 1e-6;
 			v_d *= 0.1; v_q *=0.1;
 
-#define MAXVqd 4000000
+#define MAXVqd 2000000
 			if((vd_st + v_d) <MAXVqd && (vd_st +v_d)>-MAXVqd &&
 					(vq_st + v_q)<MAXVqd && (vq_st + v_q)>-MAXVqd)
 			{
@@ -175,9 +173,9 @@ void StartcontrolTask(void const * argument)
 			RevClarkeTrans(&v_a,&v_b,&v_c,v_apha,v_beta);
 
 			//mapping the v_a v_b v_c to the real voltage and to the max duty of 2160
-			v_a *= VOLTSUP * PHASERES/1000;  //because of 1 is 1 mv
-			v_b *= VOLTSUP * PHASERES/1000;
-			v_c *= VOLTSUP * PHASERES/1000;
+			v_a *= 1e-3;  //because of 1 is 1 mv
+			v_b *= 1e-3;
+			v_c *= 1e-3;
 
 			//find the bigest one.. sent the duty to 0;
 			SVMDuty(&v_a,&v_b,&v_c);
