@@ -37,7 +37,7 @@ extern osMessageQId conresQueueHandle;
 /*
  * clarke transform: 3 120 phase to 2 orthogonal phase
  */
-inline void ClarkeTrans(volatile float a, volatile float b, volatile float *apha, volatile float *beta)
+inline void ClarkeTrans(float a, float b, float *apha, float *beta)
 {
 	*apha = 1.5 * a;
 	*beta = sq3 * b + (sq3 * a)/2;
@@ -45,7 +45,7 @@ inline void ClarkeTrans(volatile float a, volatile float b, volatile float *apha
 /*
  * reverse clarke transform: 2 orthogonal phase to 3 120 phase
  */
-inline void RevClarkeTrans(volatile float *va, volatile float *vb, volatile float *vc, volatile float apha, volatile float beta)
+inline void RevClarkeTrans(float *va, float *vb, float *vc, float apha, float beta)
 {
 	*va = 2*apha/3;
 	*vb = -apha/3 + beta/sq3;
@@ -71,7 +71,7 @@ inline void RevParkTrans(float *apha, float *beta, float theta, float v_d, float
 /*
  * SVMDuty
  */
-inline void SVMDuty(volatile float *v_a, volatile float *v_b, volatile float *v_c)
+inline void SVMDuty(float *v_a, float *v_b, float *v_c)
 {
 	float v_big, v_small;
 	//note that the duty direction and the current plus direction have a -1
@@ -88,7 +88,6 @@ inline void SVMDuty(volatile float *v_a, volatile float *v_b, volatile float *v_
 		*v_b *= -(MAXDUTY)/v_small;
 		*v_c *= -(MAXDUTY)/v_small;  //then the data is proportional under maxduty
 	}
-
 }
 
 /*
@@ -112,29 +111,29 @@ void StartcontrolTask(void const * argument)
 			//HAL_GPIO_TogglePin(GPIOC,GPIO_PIN_12);
 			//copy the data use float type.
 			//as we have FPU, fast..
-			volatile float c_a = ((float)shuntdata.cur_a)/100;
-			volatile float c_b = ((float)shuntdata.cur_b)/100;
-			volatile float c_c = ((float)shuntdata.cur_c)/100;
+			float c_a = ((float)shuntdata.cur_a)/100;
+			float c_b = ((float)shuntdata.cur_b)/100;
+			float c_c = ((float)shuntdata.cur_c)/100;
 			//now the unity is 1 for 1ma..
 
 			//obtain the encoder angle
 			if(xQueuePeek(enchallQueueHandle,&encdata,0)!=pdPASS)
 				return;
 			//clarke
-			volatile float c_apha, c_beta;
+			float c_apha, c_beta;
 			ClarkeTrans(c_a, c_b, &c_apha, &c_beta);
 			//then park...
-			volatile float theta = 4 * PI * (encdata.recon_counter - CENTERCOUNT
+			float theta = 4 * PI * (encdata.recon_counter - CENTERCOUNT
 					+ shuntdata.centeroffset) / MAXCOUNT;
-			volatile float c_d, c_q;
+			float c_d, c_q;
 			ParkTrans(c_apha,c_beta,theta,&c_d,&c_q);
 
 			/*
 			 * PID control
-			*/
+			 */
 			//P part
-			volatile float er_q = shuntdata.target_cur - c_q;
-			volatile float er_d = T_ID - c_d;
+			float er_q = shuntdata.target_cur - c_q;
+			float er_d = T_ID - c_d;
 			//debug view.. send back to PC to view the control result
 			conres.feedback_cq = ((int16_t)c_q + conres.feedback_cq)/2;
 			conres.feedback_cd = ((int16_t)c_d + conres.feedback_cd)/2;
@@ -152,8 +151,8 @@ void StartcontrolTask(void const * argument)
 				integra_Cd = -1000;
 
 			//get the control voltage
-			volatile float v_d = shuntdata.Kp * er_d + shuntdata.Ki * integra_Cd * 51.2 * 1e-6;
-			volatile float v_q = shuntdata.Kp * er_q + shuntdata.Ki * integra_Cq * 51.2 * 1e-6;
+			float v_d = shuntdata.Kp * er_d + shuntdata.Ki * integra_Cd * 51.2 * 1e-6;
+			float v_q = shuntdata.Kp * er_q + shuntdata.Ki * integra_Cq * 51.2 * 1e-6;
 			v_d *= 0.1; v_q *=0.1;
 
 #define MAXVqd 2000000
@@ -165,11 +164,11 @@ void StartcontrolTask(void const * argument)
 			}
 
 			//reverse park...
-			volatile float v_apha,v_beta;
+			float v_apha,v_beta;
 			RevParkTrans(&v_apha,&v_beta,theta,vd_st,vq_st);
 
 			//reverse clarke
-			volatile float v_a,v_b,v_c;
+			float v_a,v_b,v_c;
 			RevClarkeTrans(&v_a,&v_b,&v_c,v_apha,v_beta);
 
 			//mapping the v_a v_b v_c to the real voltage and to the max duty of 2160
@@ -179,9 +178,9 @@ void StartcontrolTask(void const * argument)
 
 			//find the bigest one.. sent the duty to 0;
 			SVMDuty(&v_a,&v_b,&v_c);
-			volatile uint16_t cont_a = (uint16_t)(-v_a);
-			volatile uint16_t cont_b = (uint16_t)(-v_b);
-			volatile uint16_t cont_c = (uint16_t)(-v_c);
+			uint16_t cont_a = (uint16_t)(-v_a);
+			uint16_t cont_b = (uint16_t)(-v_b);
+			uint16_t cont_c = (uint16_t)(-v_c);
 			setMotorDuty(cont_a, cont_b, cont_c);
 			//for debug view..
 			conres.duty_a = cont_a;conres.duty_b = cont_b;conres.duty_c = cont_c;
