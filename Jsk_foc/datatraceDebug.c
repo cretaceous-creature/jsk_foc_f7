@@ -40,11 +40,28 @@ void StartenchallTask(void const * argument)
 				  encdata.z_count - last_count;
 		  vel *= 10;
 		  last_count = encdata.z_count;
+
 		  datatosend[++i] = 'V';datatosend[++i] = ':';
-		  datatosend[++i] = vel%1000/100 + 0x30; //3bits
-		  datatosend[++i] = vel%100/10 + 0x30; //3bits
-		  datatosend[++i] = vel%10 + 0x30; //3bits
+		  datatosend[++i] = encdata.timetick%1000/100 + 0x30;
+		  datatosend[++i] = encdata.timetick%100/10 + 0x30;
+		  datatosend[++i] = encdata.timetick%10 + 0x30;
 		  datatosend[++i] = '\t';
+
+		  datatosend[++i] = 'w';datatosend[++i] = ':';
+		  if(encdata.w<0) //minus
+		  {
+			  datatosend[++i] = '-';
+			  encdata.w = ~(encdata.w - 1);
+		  }
+		  else
+			  datatosend[++i] = '+';
+		  datatosend[++i] = encdata.w%10000/1000 + 0x30;
+		  datatosend[++i] = encdata.w%1000/100 + 0x30;
+		  datatosend[++i] = encdata.w%100/10 + 0x30;
+		  datatosend[++i] = encdata.w%10 + 0x30;
+		  datatosend[++i] = '\t';
+
+
 //		  datatosend[++i] = encdata.calc_tag + 0x30; //2bits
 //		  datatosend[++i] = '\t';
 		  //datatosend[++i] = encdata.enc_counter/10 + 0x30; //msb unit
@@ -74,9 +91,10 @@ void StartenchallTask(void const * argument)
 			  datatosend[++i] = '+';
 		  datatosend[++i] = encdata.target_cur/10000 + 0x30;
 		  datatosend[++i] = encdata.target_cur%10000/1000 + 0x30;
-		  datatosend[++i] = '.';
 		  datatosend[++i] = encdata.target_cur%1000/100 + 0x30;
+		  datatosend[++i] = '.';
 		  datatosend[++i] = encdata.target_cur%100/10 + 0x30;
+		  datatosend[++i] = encdata.target_cur%10 + 0x30;
 		  datatosend[++i] = 'A';
 		  if(xQueuePeek(conresQueueHandle,&conresdata,0)==pdPASS)
 		  {
@@ -92,9 +110,10 @@ void StartenchallTask(void const * argument)
 				  datatosend[++i] = '+';
 			  datatosend[++i] = conresdata.feedback_cq/10000 + 0x30;
 			  datatosend[++i] = conresdata.feedback_cq%10000/1000 + 0x30;
-			  datatosend[++i] = '.';
 			  datatosend[++i] = conresdata.feedback_cq%1000/100 + 0x30;
+			  datatosend[++i] = '.';
 			  datatosend[++i] = conresdata.feedback_cq%100/10 + 0x30;
+			  datatosend[++i] = conresdata.feedback_cq%10 + 0x30;
 			  datatosend[++i] = 'A';
 			  datatosend[++i] = '\t';
 			  //feedback d
@@ -108,9 +127,10 @@ void StartenchallTask(void const * argument)
 				  datatosend[++i] = '+';
 			  datatosend[++i] = conresdata.feedback_cd/10000 + 0x30;
 			  datatosend[++i] = conresdata.feedback_cd%10000/1000 + 0x30;
-			  datatosend[++i] = '.';
 			  datatosend[++i] = conresdata.feedback_cd%1000/100 + 0x30;
+			  datatosend[++i] = '.';
 			  datatosend[++i] = conresdata.feedback_cd%100/10 + 0x30;
+			  datatosend[++i] = conresdata.feedback_cd%10 + 0x30;
 			  datatosend[++i] = 'A';
 			  datatosend[++i] = '\t';
 			  //duty

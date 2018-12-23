@@ -1,7 +1,9 @@
+/* USER CODE BEGIN Header */
 /**
   ******************************************************************************
-  * File Name          : main.hpp
-  * Description        : This file contains the common defines of the application
+  * @file           : main.h
+  * @brief          : Header for main.c file.
+  *                   This file contains the common defines of the application.
   ******************************************************************************
   * This notice applies to any and all portions of this file
   * that are not between comment pairs USER CODE BEGIN and
@@ -45,48 +47,73 @@
   *
   ******************************************************************************
   */
+/* USER CODE END Header */
+
 /* Define to prevent recursive inclusion -------------------------------------*/
 #ifndef __MAIN_H
 #define __MAIN_H
-  /* Includes ------------------------------------------------------------------*/
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /* Includes ------------------------------------------------------------------*/
+#include "stm32f7xx_hal.h"
+
+/* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "stdint.h"
 /* USER CODE END Includes */
 
-/* Private define ------------------------------------------------------------*/
+/* Exported types ------------------------------------------------------------*/
+/* USER CODE BEGIN ET */
 
+/* USER CODE END ET */
+
+/* Exported constants --------------------------------------------------------*/
+/* USER CODE BEGIN EC */
+#define PI 3.1416
+/* USER CODE END EC */
+
+/* Exported macro ------------------------------------------------------------*/
+/* USER CODE BEGIN EM */
+
+/* USER CODE END EM */
+
+/* Exported functions prototypes ---------------------------------------------*/
+void Error_Handler(void);
+
+/* USER CODE BEGIN EFP */
+
+/* USER CODE END EFP */
+
+/* Private defines -----------------------------------------------------------*/
 #define LEDBLUE_Pin GPIO_PIN_2
 #define LEDBLUE_GPIO_Port GPIOE
 #define LEDGREEN_Pin GPIO_PIN_3
 #define LEDGREEN_GPIO_Port GPIOE
 #define IMUCS_Pin GPIO_PIN_6
 #define IMUCS_GPIO_Port GPIOB
-
-/* ########################## Assert Selection ############################## */
-/**
-  * @brief Uncomment the line below to expanse the "assert_param" macro in the 
-  *        HAL drivers code
-  */
-/* #define USE_FULL_ASSERT    1U */
-
 /* USER CODE BEGIN Private defines */
 //encoder data
 typedef struct ENCHALLDATA
 {
-uint8_t mseq_out; //1bit
-uint8_t auxbit_in;//1bit
-uint8_t hole_in;//3bits
-uint8_t calc_tag;//2bits
-uint8_t enc_counter; //5bits  lower 5bits of 16bits of 2000 counts
-uint8_t enc_high;//1byte   obsolute encoder..
-uint8_t enc_low;//1byte
-uint16_t recon_counter;// 0~2000. default 5000.. means uinitialized..
-uint8_t Kp;
-uint8_t Ki;
-int16_t target_cur;
-uint16_t z_count;
+	uint8_t mseq_out; //1bit
+	uint8_t auxbit_in;//1bit
+	uint8_t hole_in;//3bits
+	uint8_t calc_tag;//2bits
+	uint8_t enc_counter; //5bits  lower 5bits of 16bits of 2000 counts
+	uint8_t enc_high;//1byte   obsolute encoder..
+	uint8_t enc_low;//1byte
+	uint16_t recon_counter;// 0~2000. default 5000.. means uinitialized..
+	uint8_t Kp;
+	uint8_t Ki;
+	int16_t target_cur;  //unit is 10ma
+	uint16_t z_count;
+	int32_t timetick;
+	int16_t w;
+	uint8_t MAX_W;
+
 }ENCHD;
 //current data
 typedef struct CURRENTDATA
@@ -114,22 +141,9 @@ extern void SystemInitialization(void);
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus
- extern "C" {
-#endif
-void _Error_Handler(char *, int);
-
-#define Error_Handler() _Error_Handler(__FILE__, __LINE__)
-#ifdef __cplusplus
 }
 #endif
 
-/**
-  * @}
-  */ 
-
-/**
-  * @}
-*/ 
-
 #endif /* __MAIN_H */
+
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

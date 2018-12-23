@@ -54,7 +54,6 @@
 #endif
 
 /* Includes ------------------------------------------------------------------*/
-#include "stm32f7xx_hal.h"
 #include "main.h"
 
 /* USER CODE BEGIN Includes */
@@ -66,8 +65,6 @@ extern I2C_HandleTypeDef hi2c4;
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */
-
-extern void _Error_Handler(char *, int);
 
 void MX_I2C4_Init(void);
 

@@ -54,7 +54,6 @@
 #endif
 
 /* Includes ------------------------------------------------------------------*/
-#include "stm32f7xx_hal.h"
 #include "main.h"
 
 /* USER CODE BEGIN Includes */
@@ -69,8 +68,6 @@ extern DFSDM_Channel_HandleTypeDef hdfsdm1_channel3;
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */
-
-extern void _Error_Handler(char *, int);
 
 void MX_DFSDM1_Init(void);
 

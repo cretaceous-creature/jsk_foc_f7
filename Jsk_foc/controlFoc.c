@@ -2,7 +2,7 @@
  *
  * Jsk foc project
  *
- * foc control folder,
+ * foc control folder,f
  *
  * obtain the current and encoder data to do the foc control
  *
@@ -32,7 +32,6 @@ extern osMessageQId conresQueueHandle;
 #define sq3 1.732051
 #define CENTERCOUNT 500
 #define MAXCOUNT 2000
-#define PI 3.1416
 #define T_ID 0
 /*
  * clarke transform: 3 120 phase to 2 orthogonal phase
@@ -99,6 +98,7 @@ void StartcontrolTask(void const * argument)
 {
 	float integra_Cd = 0;
 	float integra_Cq = 0;
+	float lastq = 0, lastd = 0;  //incremental control
 	float vd_st = 0, vq_st = 0;
 	CONRES conres;
 	for(;;)
@@ -111,10 +111,10 @@ void StartcontrolTask(void const * argument)
 			//HAL_GPIO_TogglePin(GPIOC,GPIO_PIN_12);
 			//copy the data use float type.
 			//as we have FPU, fast..
-			float c_a = ((float)shuntdata.cur_a)/100;
-			float c_b = ((float)shuntdata.cur_b)/100;
-			float c_c = ((float)shuntdata.cur_c)/100;
-			//now the unity is 1 for 1ma..
+			float c_a = ((float)shuntdata.cur_a)/1000;
+			float c_b = ((float)shuntdata.cur_b)/1000;
+			float c_c = ((float)shuntdata.cur_c)/1000;
+			//now the unity is 1 for 10ma..
 
 			//obtain the encoder angle
 			if(xQueuePeek(enchallQueueHandle,&encdata,0)!=pdPASS)
@@ -134,33 +134,39 @@ void StartcontrolTask(void const * argument)
 			//P part
 			float er_q = shuntdata.target_cur - c_q;
 			float er_d = T_ID - c_d;
+
+			/******************
+			 * before control the motor
+			 * we add another control loop to control velocity of the motor
+			 */
+			if(abs(encdata.w)>encdata.MAX_W*62.8)
+			{
+				er_q = 0 - c_q;
+				er_d = T_ID - c_d;
+			}
 			//debug view.. send back to PC to view the control result
 			conres.feedback_cq = ((int16_t)c_q + conres.feedback_cq)/2;
 			conres.feedback_cd = ((int16_t)c_d + conres.feedback_cd)/2;
 
-			//I part..
-			integra_Cd +=  er_d;
-			integra_Cq +=  er_q;
-			if(integra_Cq>1000)
-				integra_Cq = 1000;
-			if(integra_Cq<-1000)
-				integra_Cq = -1000;
-			if(integra_Cd>1000)
-				integra_Cd = 1000;
-			if(integra_Cd<-1000)
-				integra_Cd = -1000;
+						/*******************
+			 * these codes may have some problem, need to test it carefully later...
+			 */
+			{
+				float eer_d = er_d - lastd;
+				float eer_q = er_q - lastq;
+				lastd = er_d; lastq = er_q;
+				//get the control voltage
 
-			//get the control voltage
-			float v_d = shuntdata.Kp * er_d + shuntdata.Ki * integra_Cd * 51.2 * 1e-6;
-			float v_q = shuntdata.Kp * er_q + shuntdata.Ki * integra_Cq * 51.2 * 1e-6;
-			v_d *= 0.1; v_q *=0.1;
+				float v_d = shuntdata.Kp * eer_d + shuntdata.Ki * er_d * 1e-1;
+				float v_q = shuntdata.Kp * eer_q + shuntdata.Ki * er_q * 1e-1;
 
 #define MAXVqd 2000000
-			if((vd_st + v_d) <MAXVqd && (vd_st +v_d)>-MAXVqd &&
-					(vq_st + v_q)<MAXVqd && (vq_st + v_q)>-MAXVqd)
-			{
-				vd_st += v_d;  //equals to Kp..
-				vq_st += v_q;
+				if((vd_st + v_d) <MAXVqd && (vd_st +v_d)>-MAXVqd &&
+						(vq_st + v_q)<MAXVqd && (vq_st + v_q)>-MAXVqd)
+				{
+					vd_st += v_d;  //equals to Kp..
+					vq_st += v_q;
+				}
 			}
 
 			//reverse park...
@@ -181,7 +187,15 @@ void StartcontrolTask(void const * argument)
 			uint16_t cont_a = (uint16_t)(-v_a);
 			uint16_t cont_b = (uint16_t)(-v_b);
 			uint16_t cont_c = (uint16_t)(-v_c);
+
+
+			/******
+			 * control the motor
+			 */
 			setMotorDuty(cont_a, cont_b, cont_c);
+
+
+
 			//for debug view..
 			conres.duty_a = cont_a;conres.duty_b = cont_b;conres.duty_c = cont_c;
 			xQueueOverwrite(conresQueueHandle,&conres);
@@ -192,7 +206,21 @@ void StartcontrolTask(void const * argument)
 		{
 			//1ms no current data was receieved...something is wrong...error handle
 			//  _Error_Handler("controlFOC, 1ms no data receved.",500);
+//			if(HAL_DFSDM_FilterPollForRegConversion(&hdfsdm1_filter0,0) == HAL_OK &&
+//					HAL_DFSDM_FilterPollForRegConversion(&hdfsdm1_filter1,0) == HAL_OK)
+//			{
+//				//also we need to deal with the offset by shorting the shunt sensor..
+//				shuntdata.cur_b = HAL_DFSDM_FilterGetRegularValue(&hdfsdm1_filter0,(uint32_t *)&hdfsdm1_channel0);
+//				shuntdata.cur_a = HAL_DFSDM_FilterGetRegularValue(&hdfsdm1_filter1,(uint32_t *)&hdfsdm1_channel3);
+//				// f 256, I 2,  a: 8600 b:18400;  1ma = 100
+//				// f 128, I 2,  a:1200 b:2300;   1ma = 100/(2^3) = 12.5
+//				shuntdata.cur_a -= 8600;
+//				shuntdata.cur_b -= 18400;
+//				shuntdata.cur_c = -shuntdata.cur_a - shuntdata.cur_b;
+//				volatile float cc = ((float)shuntdata.cur_a)/100;
+//			}
 			osDelay(1);
 		}
   }
 }
+

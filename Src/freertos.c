@@ -1,3 +1,4 @@
+/* USER CODE BEGIN Header */
 /**
   ******************************************************************************
   * File Name          : freertos.c
@@ -45,17 +46,38 @@
   *
   ******************************************************************************
   */
+/* USER CODE END Header */
 
 /* Includes ------------------------------------------------------------------*/
 #include "FreeRTOS.h"
 #include "task.h"
+#include "main.h"
 #include "cmsis_os.h"
 
+/* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */     
-#include "main.h"
+
 /* USER CODE END Includes */
 
-/* Variables -----------------------------------------------------------------*/
+/* Private typedef -----------------------------------------------------------*/
+/* USER CODE BEGIN PTD */
+
+/* USER CODE END PTD */
+
+/* Private define ------------------------------------------------------------*/
+/* USER CODE BEGIN PD */
+
+/* USER CODE END PD */
+
+/* Private macro -------------------------------------------------------------*/
+/* USER CODE BEGIN PM */
+
+/* USER CODE END PM */
+
+/* Private variables ---------------------------------------------------------*/
+/* USER CODE BEGIN Variables */
+
+/* USER CODE END Variables */
 osThreadId enchallTaskHandle;
 osThreadId controlTaskHandle;
 osThreadId ledblueTaskHandle;
@@ -70,11 +92,11 @@ osMessageQId shuntQueueHandle;
 osMessageQId conresQueueHandle;
 osMutexId buzzerMutexHandle;
 
-/* USER CODE BEGIN Variables */
+/* Private function prototypes -----------------------------------------------*/
+/* USER CODE BEGIN FunctionPrototypes */
 
-/* USER CODE END Variables */
+/* USER CODE END FunctionPrototypes */
 
-/* Function prototypes -------------------------------------------------------*/
 void StartenchallTask(void const * argument);
 void StartcontrolTask(void const * argument);
 void StartledblueTask(void const * argument);
@@ -85,14 +107,11 @@ void StartbuzzerrythmTask(void const * argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
-/* USER CODE BEGIN FunctionPrototypes */
-
-/* USER CODE END FunctionPrototypes */
-
-/* Hook prototypes */
-
-/* Init FreeRTOS */
-
+/**
+  * @brief  FreeRTOS initialization
+  * @param  None
+  * @retval None
+  */
 void MX_FREERTOS_Init(void) {
   /* USER CODE BEGIN Init */
        
@@ -175,7 +194,13 @@ void MX_FREERTOS_Init(void) {
   /* USER CODE END RTOS_QUEUES */
 }
 
-/* StartenchallTask function */
+/* USER CODE BEGIN Header_StartenchallTask */
+/**
+  * @brief  Function implementing the enchallTask thread.
+  * @param  argument: Not used 
+  * @retval None
+  */
+/* USER CODE END Header_StartenchallTask */
 __weak void StartenchallTask(void const * argument)
 {
 
@@ -188,7 +213,13 @@ __weak void StartenchallTask(void const * argument)
   /* USER CODE END StartenchallTask */
 }
 
-/* StartcontrolTask function */
+/* USER CODE BEGIN Header_StartcontrolTask */
+/**
+* @brief Function implementing the controlTask thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_StartcontrolTask */
 __weak void StartcontrolTask(void const * argument)
 {
   /* USER CODE BEGIN StartcontrolTask */
@@ -200,7 +231,13 @@ __weak void StartcontrolTask(void const * argument)
   /* USER CODE END StartcontrolTask */
 }
 
-/* StartledblueTask function */
+/* USER CODE BEGIN Header_StartledblueTask */
+/**
+* @brief Function implementing the ledblueTask thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_StartledblueTask */
 __weak void StartledblueTask(void const * argument)
 {
   /* USER CODE BEGIN StartledblueTask */
@@ -212,7 +249,13 @@ __weak void StartledblueTask(void const * argument)
   /* USER CODE END StartledblueTask */
 }
 
-/* StartledgreenTask function */
+/* USER CODE BEGIN Header_StartledgreenTask */
+/**
+* @brief Function implementing the ledgreenTask thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_StartledgreenTask */
 __weak void StartledgreenTask(void const * argument)
 {
   /* USER CODE BEGIN StartledgreenTask */
@@ -224,7 +267,13 @@ __weak void StartledgreenTask(void const * argument)
   /* USER CODE END StartledgreenTask */
 }
 
-/* StartiwdgTask function */
+/* USER CODE BEGIN Header_StartiwdgTask */
+/**
+* @brief Function implementing the iwdgTask thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_StartiwdgTask */
 __weak void StartiwdgTask(void const * argument)
 {
   /* USER CODE BEGIN StartiwdgTask */
@@ -236,7 +285,13 @@ __weak void StartiwdgTask(void const * argument)
   /* USER CODE END StartiwdgTask */
 }
 
-/* StartbuzzertoneTask function */
+/* USER CODE BEGIN Header_StartbuzzertoneTask */
+/**
+* @brief Function implementing the buzzertoneTask thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_StartbuzzertoneTask */
 __weak void StartbuzzertoneTask(void const * argument)
 {
   /* USER CODE BEGIN StartbuzzertoneTask */
@@ -248,7 +303,13 @@ __weak void StartbuzzertoneTask(void const * argument)
   /* USER CODE END StartbuzzertoneTask */
 }
 
-/* StartbuzzerrythmTask function */
+/* USER CODE BEGIN Header_StartbuzzerrythmTask */
+/**
+* @brief Function implementing the buzzerrythmTask thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_StartbuzzerrythmTask */
 __weak void StartbuzzerrythmTask(void const * argument)
 {
   /* USER CODE BEGIN StartbuzzerrythmTask */
@@ -260,6 +321,7 @@ __weak void StartbuzzerrythmTask(void const * argument)
   /* USER CODE END StartbuzzerrythmTask */
 }
 
+/* Private application code --------------------------------------------------*/
 /* USER CODE BEGIN Application */
      
 /* USER CODE END Application */

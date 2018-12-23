@@ -22,9 +22,12 @@
 #include "gpio.h"
 
 
+
 //databuff
 extern uint8_t enchall_buff[5];
 extern uint8_t order_buff[5];
+extern DMA_HandleTypeDef hdma_uart4_rx;
+extern void UART4_DMA2_Cplt_Callback(DMA_HandleTypeDef *_hdma);
 //int32_t cur_u;
 //int32_t cur_v;
 
@@ -34,7 +37,7 @@ void SystemInitialization(void)
 	 * start tim2 for BUZZER
 	 */
 	HAL_TIM_PWM_Start(&htim2,TIM_CHANNEL_1);
-
+	HAL_TIM_Base_Start(&htim3);
 	/*
 	 * tim1 pwm initialization
 	 * About the dead time...
@@ -54,10 +57,10 @@ void SystemInitialization(void)
 	/*
 	 * register the call back of uart4 transmit..
 	 */
-	//HAL_DMA_RegisterCallback(&hdma_uart4_rx,HAL_DMA_XFER_CPLTUART4_DMA2_Cplt_Callback);
-	HAL_UART_Receive_DMA(&huart4,enchall_buff,5);
-	HAL_UART_Receive_DMA(&huart1,order_buff,6);
 
+	HAL_UART_Receive_DMA(&huart4,enchall_buff,5);
+	HAL_UART_Receive_DMA(&huart1,order_buff,7);
+//HAL_DMA_RegisterCallback(&hdma_uart4_rx,HAL_DMA_XFER_CPLT_CB_ID,UART4_DMA2_Cplt_Callback);
 	/*
 	 * DFSDM initial
 	 */
