@@ -109,7 +109,7 @@ typedef struct ENCHALLDATA
 	uint8_t Kp;
 	uint8_t Ki;
 	int16_t target_cur;  //unit is 10ma
-	uint16_t z_count;
+	int16_t z_count;
 	int32_t timetick;
 	int16_t w;
 	uint8_t MAX_W;

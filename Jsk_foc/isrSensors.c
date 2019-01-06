@@ -106,20 +106,28 @@ void HAL_UART_RxHalfCpltCallback(UART_HandleTypeDef *huart)
 					if(enchall.calc_tag == 2) //all 0
 					{
 						enchall.recon_counter = enchall.enc_counter;  //only 5bit has number, other bits are 0
+						if(flag==2)
+							enchall.z_count++;
 						flag = 1;
 					}
 					else if(enchall.calc_tag == 3) //all 1    except the last 5 bits... other bits are 1
 					{
 						enchall.recon_counter = ALLONECOUNT + enchall.enc_counter;
-						if(flag)
-						{enchall.z_count++;flag=0;}			//z_count counts every circle
+						if(flag==1)
+							enchall.z_count--;
+						flag = 2;
 					}
 					else
 					{
+						flag = 0;
 						if(enchall.enc_counter-last5bitsdata>16) //overflowed..
+						{
 							enchall.recon_counter = (enchall.recon_counter - 32)&0xFFE0|enchall.enc_counter;
+						}
 						else if(enchall.enc_counter-last5bitsdata<-16)
+						{
 							enchall.recon_counter = (enchall.recon_counter + 32)&0xFFE0|enchall.enc_counter;
+						}
 						else //not overflow
 							enchall.recon_counter = enchall.recon_counter&0xFFE0|enchall.enc_counter;
 					}
@@ -189,9 +197,10 @@ void HAL_UART_RxHalfCpltCallback(UART_HandleTypeDef *huart)
 	//USART 1 DMA interrupt
 	else if(huart->Instance==huart1.Instance)
 	{
+		static BaseType_t xHigherPriorityTaskWoken = pdFALSE;
 		for(int i=0; i<UART1BYTE; i++)
 		{
-			if(order_buff[i] == TXHEADER)
+			if(order_buff[i] == TXHEADER || order_buff[i] == TXHEADER +1)
 			{
 				uint8_t s = i==UART1BYTE-1?0:i+1; //second byte  1xxx|xxxx
 				uint8_t t = s==UART1BYTE-1?0:s+1; //third byte   011x|xxxx
@@ -203,23 +212,41 @@ void HAL_UART_RxHalfCpltCallback(UART_HandleTypeDef *huart)
 					//next two bytes
 					uint8_t b1 = t==UART1BYTE-1?0:t+1;
 					uint8_t b2 = b1==UART1BYTE-1?0:b1+1;
-					motorcurrent.target_cur =  (((int16_t)order_buff[b2]&0x7f) << 8) | order_buff[b1];
-					if(order_buff[b2]&0x80) //minus
-						motorcurrent.target_cur = -motorcurrent.target_cur;
-					uint8_t b3 = b2==UART1BYTE-1?0:b2+1;
-					motorcurrent.centeroffset = order_buff[b3]&0x7f;
-					if(order_buff[b3]&0x80) //minus
-						motorcurrent.centeroffset = -motorcurrent.centeroffset;
+					uint8_t b3;
+					if(order_buff[i] == TXHEADER)
+					{
+						motorcurrent.target_cur =  (((int16_t)order_buff[b2]&0x7f) << 8) | order_buff[b1];
+						if(order_buff[b2]&0x80) //minus
+							motorcurrent.target_cur = -motorcurrent.target_cur;
+						b3 = b2==UART1BYTE-1?0:b2+1;
+						motorcurrent.centeroffset = order_buff[b3]&0x7f;
+						if(order_buff[b3]&0x80) //minus
+							motorcurrent.centeroffset = -motorcurrent.centeroffset;
+					}
+					else
+					{
+						motorcurrent.target_cur =  *(int16_t *)(&order_buff[b1]);
+						b3 = b2==UART1BYTE-1?0:b2+1;
+						motorcurrent.centeroffset = *(int8_t*)&order_buff[b3];
+					}
+
 					uint8_t b4 = b3==UART1BYTE-1?0:b3+1;
 					enchall.MAX_W = order_buff[b4];
 					enchall.Kp = motorcurrent.Kp;
 					enchall.Ki = motorcurrent.Ki;
 					enchall.target_cur = motorcurrent.target_cur;
 				}
+				xQueueSendFromISR(shuntQueueHandle,&motorcurrent,&xHigherPriorityTaskWoken);
+				xQueueOverwriteFromISR(enchallQueueHandle,&enchall, &xHigherPriorityTaskWoken);
+				//transmit the received buff, here to test the delay...
+//				__HAL_UNLOCK(&huart1);
+//				HAL_UART_Transmit(&huart1,order_buff,UART1BYTE,5);
+//				__HAL_LOCK(&huart1);
 			}
 		}
 		//continue DMA
 		HAL_UART_DMAResume(&huart1);
+		portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
 	}
 }
 
