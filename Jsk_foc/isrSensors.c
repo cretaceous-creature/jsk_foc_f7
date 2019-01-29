@@ -70,7 +70,7 @@ void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart)
  * obtain hall sensor, encoder, etc data from intelligent board.
  * data updating rate <10us  ~100khz
  */
-void HAL_UART_RxHalfCpltCallback(UART_HandleTypeDef *huart)
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
 	/*
 	 * firstly when the ISR is called it knows a the previous task A when the ISR is not triggered
@@ -208,25 +208,23 @@ void HAL_UART_RxHalfCpltCallback(UART_HandleTypeDef *huart)
 				{
 					//then we can obtain the correct bytes...
 					motorcurrent.Kp = order_buff[s] & 0x7f;
-					motorcurrent.Ki = order_buff[t] & 0x1f;
+					motorcurrent.Ki = order_buff[t] & 0x9f;
 					//next two bytes
-					uint8_t b1 = t==UART1BYTE-1?0:t+1;
-					uint8_t b2 = b1==UART1BYTE-1?0:b1+1;
-					uint8_t b3;
+					volatile uint8_t b1 = t==UART1BYTE-1?0:t+1;
+					volatile uint8_t b2 = b1==UART1BYTE-1?0:b1+1;
+					volatile uint8_t b3 = b2==UART1BYTE-1?0:b2+1;
 					if(order_buff[i] == TXHEADER)
 					{
 						motorcurrent.target_cur =  (((int16_t)order_buff[b2]&0x7f) << 8) | order_buff[b1];
 						if(order_buff[b2]&0x80) //minus
 							motorcurrent.target_cur = -motorcurrent.target_cur;
-						b3 = b2==UART1BYTE-1?0:b2+1;
 						motorcurrent.centeroffset = order_buff[b3]&0x7f;
 						if(order_buff[b3]&0x80) //minus
 							motorcurrent.centeroffset = -motorcurrent.centeroffset;
 					}
 					else
 					{
-						motorcurrent.target_cur =  *(int16_t *)(&order_buff[b1]);
-						b3 = b2==UART1BYTE-1?0:b2+1;
+						motorcurrent.target_cur  =  *(int16_t *)(&order_buff[b1]);
 						motorcurrent.centeroffset = *(int8_t*)&order_buff[b3];
 					}
 
@@ -242,6 +240,7 @@ void HAL_UART_RxHalfCpltCallback(UART_HandleTypeDef *huart)
 //				__HAL_UNLOCK(&huart1);
 //				HAL_UART_Transmit(&huart1,order_buff,UART1BYTE,5);
 //				__HAL_LOCK(&huart1);
+				break;
 			}
 		}
 		//continue DMA

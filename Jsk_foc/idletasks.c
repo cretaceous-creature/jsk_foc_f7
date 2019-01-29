@@ -138,6 +138,7 @@ void StartbuzzertoneTask(void const * argument)
 		else
 		{
 			htim2.Instance->CCR1=htim2.Instance->CCR1 = 0;
+			osDelay(10);
 		}
 	}
 }

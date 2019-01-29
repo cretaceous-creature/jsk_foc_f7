@@ -30,7 +30,7 @@ extern osMessageQId conresQueueHandle;
 		htim1.Instance->CCR3=dutyC;}
 
 #define sq3 1.732051
-#define CENTERCOUNT 500
+#define CENTERCOUNT 532
 #define MAXCOUNT 2000
 #define T_ID 0
 /*
@@ -113,7 +113,7 @@ void StartcontrolTask(void const * argument)
 			//as we have FPU, fast..
 			float c_a = ((float)shuntdata.cur_a)/1000;
 			float c_b = ((float)shuntdata.cur_b)/1000;
-			float c_c = ((float)shuntdata.cur_c)/1000;
+//			float c_c = ((float)shuntdata.cur_c)/1000;
 			//now the unity is 1 for 10ma..
 
 			//obtain the encoder angle
@@ -160,12 +160,12 @@ void StartcontrolTask(void const * argument)
 				float v_d = shuntdata.Kp * eer_d + shuntdata.Ki * er_d * 1e-1;
 				float v_q = shuntdata.Kp * eer_q + shuntdata.Ki * er_q * 1e-1;
 
-#define MAXVqd 2000000
+#define MAXVqd 1000000
 				if((vd_st + v_d) <MAXVqd && (vd_st +v_d)>-MAXVqd &&
 						(vq_st + v_q)<MAXVqd && (vq_st + v_q)>-MAXVqd)
 				{
-					vd_st += v_d;  //equals to Kp..
-					vq_st += v_q;
+					vd_st += v_d + v_d;  //equals to Kp..
+					vq_st += v_q + v_q;
 				}
 			}
 

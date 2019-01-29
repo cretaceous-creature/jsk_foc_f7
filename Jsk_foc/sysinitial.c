@@ -25,7 +25,7 @@
 
 //databuff
 extern uint8_t enchall_buff[5];
-extern uint8_t order_buff[5];
+extern volatile uint8_t order_buff[7];
 extern DMA_HandleTypeDef hdma_uart4_rx;
 extern void UART4_DMA2_Cplt_Callback(DMA_HandleTypeDef *_hdma);
 //int32_t cur_u;

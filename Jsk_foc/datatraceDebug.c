@@ -190,8 +190,9 @@ void StartenchallTask(void const * argument)
 
 #endif
 		  __HAL_UNLOCK(&huart1);
-		  HAL_UART_Transmit(&huart1,datatosend,i,5);
-		  __HAL_LOCK(&huart1);
+		  HAL_UART_Transmit(&huart1,datatosend,i,1);
+		  //HAL_UART_Transmit_IT(&huart1,datatosend,i);
+//		  __HAL_LOCK(&huart1);
 	  }
 	  //every 100mini
 #ifdef DVIEW

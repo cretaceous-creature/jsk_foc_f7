@@ -123,10 +123,10 @@ typedef struct CURRENTDATA
 	int32_t cur_c; //w
 	uint8_t Kp;
 	uint8_t Ki;
-	int16_t target_cur;
 	int8_t centeroffset;
-	//cur_c = -cur_a-cur_b
+	int16_t target_cur;
 }CURDATA;
+
 //PID control result
 typedef struct CONRESULT
 {
