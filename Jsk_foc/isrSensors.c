@@ -34,8 +34,8 @@ volatile static int32_t cnt;
 volatile static int32_t cnt_e;
 volatile static int16_t last_recon = 0;
 volatile static int8_t fivetimecount = 51;
-#define MAX_COUNT 2000
-#define ALLONECOUNT 1984
+#define MAX_COUNT 10000
+#define ALLONECOUNT 9984
 //rotor speed estimation
 #define MAX_V_FRAME 10
 static int32_t v_buff[MAX_V_FRAME][3];
@@ -146,8 +146,8 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 						{
 							//enchall.timetick++; //for debug
 							volatile int16_t ct = enchall.recon_counter - last_recon;
-							ct = ct>1000?enchall.recon_counter-last_recon-2000:ct;
-							ct = ct<-1000?enchall.recon_counter-last_recon+2000:ct;
+							ct = ct>5000?enchall.recon_counter-last_recon-10000:ct;
+							ct = ct<-5000?enchall.recon_counter-last_recon+10000:ct;
 							// every element in v_buff has 3 members,
 							//0 is count changed, 1 is time(us), 2 is the calculated speed(c/s)
 							v_buff[v_index][0] = ct;v_buff[v_index][1] = cnt_e;

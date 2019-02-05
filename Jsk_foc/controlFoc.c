@@ -30,8 +30,8 @@ extern osMessageQId conresQueueHandle;
 		htim1.Instance->CCR3=dutyC;}
 
 #define sq3 1.732051
-#define CENTERCOUNT 532
-#define MAXCOUNT 2000
+#define CENTERCOUNT 2280
+#define MAXCOUNT 10000
 #define T_ID 0
 /*
  * clarke transform: 3 120 phase to 2 orthogonal phase
@@ -123,8 +123,8 @@ void StartcontrolTask(void const * argument)
 			float c_apha, c_beta;
 			ClarkeTrans(c_a, c_b, &c_apha, &c_beta);
 			//then park...
-			float theta = 4 * PI * (encdata.recon_counter - CENTERCOUNT
-					+ shuntdata.centeroffset) / MAXCOUNT;
+			volatile float theta = - 8 * PI * (encdata.recon_counter + CENTERCOUNT
+					+ shuntdata.centeroffset*10) / MAXCOUNT;
 			float c_d, c_q;
 			ParkTrans(c_apha,c_beta,theta,&c_d,&c_q);
 
