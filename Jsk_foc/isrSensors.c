@@ -105,16 +105,22 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 					//process the data... change to from 0-2000 encoder count..
 					if(enchall.calc_tag == 2) //all 0
 					{
-						enchall.recon_counter = enchall.enc_counter;  //only 5bit has number, other bits are 0
 						if(flag==2)
 							enchall.z_count++;
+						//this means that the z phase reset too early
+						if(!(abs(enchall.recon_counter - 10000) < 200 || enchall.recon_counter < 200))
+								enchall.z_count = 0;
+						enchall.recon_counter = enchall.enc_counter;  //only 5bit has number, other bits are 0
 						flag = 1;
 					}
 					else if(enchall.calc_tag == 3) //all 1    except the last 5 bits... other bits are 1
 					{
-						enchall.recon_counter = ALLONECOUNT + enchall.enc_counter;
 						if(flag==1)
 							enchall.z_count--;
+						//this means that the z phase reset too early
+						if(!(abs(enchall.recon_counter - 10000) < 200 || enchall.recon_counter < 200))
+								enchall.z_count = 0;
+						enchall.recon_counter = ALLONECOUNT + enchall.enc_counter;
 						flag = 2;
 					}
 					else
@@ -180,6 +186,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 						motorcurrent.cur_b -= 18400;
 						motorcurrent.cur_c = - motorcurrent.cur_a - motorcurrent.cur_b;
 						xQueueSendFromISR(shuntQueueHandle,&motorcurrent,&xHigherPriorityTaskWoken);
+						HAL_GPIO_TogglePin(GPIOC,GPIO_PIN_12);
 					}
 
 					//send the queue to tasks...

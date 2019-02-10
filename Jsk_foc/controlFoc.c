@@ -200,7 +200,7 @@ void StartcontrolTask(void const * argument)
 			conres.duty_a = cont_a;conres.duty_b = cont_b;conres.duty_c = cont_c;
 			xQueueOverwrite(conresQueueHandle,&conres);
 			//to test the control frequency
-			HAL_GPIO_TogglePin(GPIOC,GPIO_PIN_12);
+//			HAL_GPIO_TogglePin(GPIOC,GPIO_PIN_12);
 		}
 		else
 		{
