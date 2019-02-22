@@ -194,58 +194,6 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 		portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
 	}
 
-	//USART 1 DMA interrupt
-	else if(huart->Instance==huart1.Instance)
-	{
-		static BaseType_t xHigherPriorityTaskWoken = pdFALSE;
-		for(int i=0; i<UART1BYTE; i++)
-		{
-			if(order_buff[i] == TXHEADER || order_buff[i] == TXHEADER +1)
-			{
-				uint8_t s = i==UART1BYTE-1?0:i+1; //second byte  1xxx|xxxx
-				uint8_t t = s==UART1BYTE-1?0:s+1; //third byte   011x|xxxx
-				if(order_buff[s]&0x80&&order_buff[t]&0x60)
-				{
-					//then we can obtain the correct bytes...
-					motorcurrent.Kp = order_buff[s] & 0x7f;
-					motorcurrent.Ki = order_buff[t] & 0x9f;
-					//next two bytes
-					volatile uint8_t b1 = t==UART1BYTE-1?0:t+1;
-					volatile uint8_t b2 = b1==UART1BYTE-1?0:b1+1;
-					volatile uint8_t b3 = b2==UART1BYTE-1?0:b2+1;
-					if(order_buff[i] == TXHEADER)
-					{
-						motorcurrent.target_cur =  (((int16_t)order_buff[b2]&0x7f) << 8) | order_buff[b1];
-						if(order_buff[b2]&0x80) //minus
-							motorcurrent.target_cur = -motorcurrent.target_cur;
-						motorcurrent.centeroffset = order_buff[b3]&0x7f;
-						if(order_buff[b3]&0x80) //minus
-							motorcurrent.centeroffset = -motorcurrent.centeroffset;
-					}
-					else
-					{
-						motorcurrent.target_cur  =  *(int16_t *)(&order_buff[b1]);
-						motorcurrent.centeroffset = *(int8_t*)&order_buff[b3];
-					}
 
-					uint8_t b4 = b3==UART1BYTE-1?0:b3+1;
-					enchall.MAX_W = order_buff[b4];
-					enchall.Kp = motorcurrent.Kp;
-					enchall.Ki = motorcurrent.Ki;
-					enchall.target_cur = motorcurrent.target_cur;
-				}
-				xQueueSendFromISR(shuntQueueHandle,&motorcurrent,&xHigherPriorityTaskWoken);
-				xQueueOverwriteFromISR(enchallQueueHandle,&enchall, &xHigherPriorityTaskWoken);
-				//transmit the received buff, here to test the delay...
-//				__HAL_UNLOCK(&huart1);
-//				HAL_UART_Transmit(&huart1,order_buff,UART1BYTE,5);
-//				__HAL_LOCK(&huart1);
-				break;
-			}
-		}
-		//continue DMA
-		HAL_UART_DMAResume(&huart1);
-		portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
-	}
 }
 

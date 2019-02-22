@@ -136,11 +136,11 @@ void MX_FREERTOS_Init(void) {
 
   /* Create the thread(s) */
   /* definition and creation of enchallTask */
-  osThreadDef(enchallTask, StartenchallTask, osPriorityIdle, 0, 128);
+  osThreadDef(enchallTask, StartenchallTask, osPriorityNormal, 0, 1280);
   enchallTaskHandle = osThreadCreate(osThread(enchallTask), NULL);
 
   /* definition and creation of controlTask */
-  osThreadDef(controlTask, StartcontrolTask, osPriorityIdle, 0, 128);
+  osThreadDef(controlTask, StartcontrolTask, osPriorityAboveNormal, 0, 128);
   controlTaskHandle = osThreadCreate(osThread(controlTask), NULL);
 
   /* definition and creation of ledblueTask */

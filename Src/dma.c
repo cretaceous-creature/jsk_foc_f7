@@ -10,7 +10,7 @@
   * inserted by the user or by software development tools
   * are owned by their respective copyright owners.
   *
-  * Copyright (c) 2018 STMicroelectronics International N.V. 
+  * Copyright (c) 2019 STMicroelectronics International N.V. 
   * All rights reserved.
   *
   * Redistribution and use in source and binary forms, with or without 
@@ -75,14 +75,17 @@ void MX_DMA_Init(void)
   HAL_NVIC_SetPriority(DMA1_Stream2_IRQn, 5, 0);
   HAL_NVIC_EnableIRQ(DMA1_Stream2_IRQn);
   /* DMA2_Stream0_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(DMA2_Stream0_IRQn, 6, 0);
+  HAL_NVIC_SetPriority(DMA2_Stream0_IRQn, 5, 0);
   HAL_NVIC_EnableIRQ(DMA2_Stream0_IRQn);
   /* DMA2_Stream1_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(DMA2_Stream1_IRQn, 6, 0);
+  HAL_NVIC_SetPriority(DMA2_Stream1_IRQn, 5, 0);
   HAL_NVIC_EnableIRQ(DMA2_Stream1_IRQn);
   /* DMA2_Stream2_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(DMA2_Stream2_IRQn, 5, 0);
   HAL_NVIC_EnableIRQ(DMA2_Stream2_IRQn);
+  /* DMA2_Stream7_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA2_Stream7_IRQn, 5, 0);
+  HAL_NVIC_EnableIRQ(DMA2_Stream7_IRQn);
 
 }
 

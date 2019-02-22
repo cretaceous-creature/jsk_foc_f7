@@ -6,3 +6,4 @@
 *.lib
 *.chm
 *.html
+/Debug/

@@ -18,7 +18,6 @@
 #include "spi.h"
 #include "tim.h"
 #include "usart.h"
-#include "usb_otg.h"
 #include "gpio.h"
 
 
@@ -27,7 +26,6 @@
 extern uint8_t enchall_buff[5];
 extern volatile uint8_t order_buff[7];
 extern DMA_HandleTypeDef hdma_uart4_rx;
-extern void UART4_DMA2_Cplt_Callback(DMA_HandleTypeDef *_hdma);
 //int32_t cur_u;
 //int32_t cur_v;
 
@@ -59,7 +57,7 @@ void SystemInitialization(void)
 	 */
 
 	HAL_UART_Receive_DMA(&huart4,enchall_buff,5);
-	HAL_UART_Receive_DMA(&huart1,order_buff,7);
+	//HAL_UART_Receive_DMA(&huart1,order_buff,7);
 //HAL_DMA_RegisterCallback(&hdma_uart4_rx,HAL_DMA_XFER_CPLT_CB_ID,UART4_DMA2_Cplt_Callback);
 	/*
 	 * DFSDM initial
